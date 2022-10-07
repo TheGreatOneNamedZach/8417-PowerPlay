@@ -16,6 +16,14 @@ apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
 android {
+
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src\\main\\java', 'src\\main\\java\\2', 'src\\main\\java\\org.firstinspires.ftc.teamcode\\motors', 'src\\main\\java\\org\\firstinspires\\ftc\\teamcode\\motors'
+            }
+        }
+    }
     namespace = 'org.firstinspires.ftc.teamcode'
 }
 
