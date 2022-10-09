@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="2021 Tank Drive", group="Other")
 public class tankDrive2021 extends OpMode{
     private DcMotor motor1 = null;
-    private ElapsedTime runtime = new ElapsedTime();
     double motorPower;
 
     @Override
@@ -18,8 +17,7 @@ public class tankDrive2021 extends OpMode{
     }
 
     public void loop() {
-
-        telemetry.addData("Runtime", Math.round(getRuntime()));
+        telemetry.addData("Runtime", Math.round(getRuntime()) + " sec");
         motorPower = gamepad1.left_stick_x;
         motor1.setPower(motorPower);
         telemetry.addData("Motor1", motorPower);
