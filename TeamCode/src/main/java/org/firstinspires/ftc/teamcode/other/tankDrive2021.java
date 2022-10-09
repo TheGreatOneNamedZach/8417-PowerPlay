@@ -19,6 +19,7 @@ public class tankDrive2021 extends OpMode{
 
     public void loop() {
         telemetry.addData("Runtime", runtime);
+        motorPower = gamepad1.left_stick_x;
         motor1.setPower(motorPower);
         telemetry.addData("Motor1", motorPower);
     }
