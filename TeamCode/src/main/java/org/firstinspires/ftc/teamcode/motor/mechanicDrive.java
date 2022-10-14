@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.motor;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.Arrays;
 
@@ -21,7 +22,8 @@ public class mechanicDrive extends OpMode{
         DcMotor bR = hardwareMap.get(DcMotor.class, "Back Right");
         DcMotor bL = hardwareMap.get(DcMotor.class, "Back Left");
 
-        //FIND WHAT MOTOR GOES BACKWARDS!!!!!
+        fR.setDirection(DcMotorSimple.Direction.REVERSE);
+        fL.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
