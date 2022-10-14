@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.motor;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.Arrays;
 
+@TeleOp(name = "Mechanum Drive", group = "e")
 public class mechanicDrive extends OpMode{
 
     DcMotor fR = null;
