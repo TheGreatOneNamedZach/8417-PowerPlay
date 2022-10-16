@@ -14,15 +14,15 @@ public class mechanicDrive extends OpMode{
     DcMotor fL = null;
     DcMotor bR = null;
     DcMotor bL = null;
-    double damper = 1; //This is to control the speed at which all the wheels turn
+    double damper = 0.75; //This is to control the percent of energy being applied to the motors.
 
 
     @Override
     public void init() {
-        DcMotor fR = hardwareMap.get(DcMotor.class, "Front Right");
-        DcMotor fL = hardwareMap.get(DcMotor.class, "Front Left");
-        DcMotor bR = hardwareMap.get(DcMotor.class, "Back Right");
-        DcMotor bL = hardwareMap.get(DcMotor.class, "Back Left");
+        fR = hardwareMap.get(DcMotor.class, "Front Right");
+        fL = hardwareMap.get(DcMotor.class, "Front Left");
+        bR = hardwareMap.get(DcMotor.class, "Back Right");
+        bL = hardwareMap.get(DcMotor.class, "Back Left");
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -35,11 +35,19 @@ public class mechanicDrive extends OpMode{
 
     public void setPowerMechanum(double x, double y, double rot) {//rot is short for rotation
         //Code to calculate motor power
+        x = x * -1;
         double fRMotorPwr = x - y - rot;
         double fLMotorPwr = x + y + rot;
         double bRMotorPwr = x + y - rot;
         double bLMotorPwr = x - y + rot;
+        /* This is the first version of algorithms
+        double fRMotorPwr = x - y - rot;
+        double fLMotorPwr = x + y + rot;
+        double bRMotorPwr = x + y - rot;
+        double bLMotorPwr = x - y + rot;
+         */
 
+        /*
         double[] motorPwrs = {
 
                 Math.abs(fRMotorPwr),
@@ -55,12 +63,19 @@ public class mechanicDrive extends OpMode{
             fLMotorPwr = fLMotorPwr / motorPwrs[3];
             bRMotorPwr = bRMotorPwr / motorPwrs[3];
             bLMotorPwr = bLMotorPwr / motorPwrs[3];
+        }*/
+        telemetry.addData("fRMotorPwr", fRMotorPwr);
+        telemetry.addData("fLMotorPwr", fLMotorPwr);
+        telemetry.addData("bRMotorPwr", bRMotorPwr);
+        telemetry.addData("bLMotorPwr", bLMotorPwr);
+        try {
+            fR.setPower(fRMotorPwr * damper);
+            fL.setPower(fLMotorPwr * damper);
+            bR.setPower(bRMotorPwr * damper);
+            bL.setPower(bLMotorPwr * damper);
+        } catch(Exception e) {
+            telemetry.addData("Error", e);
         }
-
-        fR.setPower(fRMotorPwr / damper);
-        fL.setPower(fLMotorPwr / damper);
-        bR.setPower(bRMotorPwr / damper);
-        bL.setPower(bLMotorPwr / damper);
 
 
 
