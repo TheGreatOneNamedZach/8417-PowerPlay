@@ -34,6 +34,7 @@ public class mechanicDrive extends OpMode{
     }
 
     public void setPowerMechanum(double x, double y, double rot) {//rot is short for rotation
+        x = x * 1.1;
         //Code to calculate motor power
         double ratio = Math.max((Math.abs(y) + Math.abs(x) + Math.abs(rot)), 1);
         double fRMotorPwr = (y - x - rot) / ratio;
