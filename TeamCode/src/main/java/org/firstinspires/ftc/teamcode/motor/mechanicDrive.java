@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.motor;
 
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import java.util.Arrays;
+import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
 public class mechanicDrive extends OpMode{
@@ -14,8 +15,13 @@ public class mechanicDrive extends OpMode{
     DcMotor fL = null;
     DcMotor bR = null;
     DcMotor bL = null;
-    double damper = 0.75; //This is to control the percent of energy being applied to the motors.
-
+    double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
+    double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
+    static final DecimalFormat df = new DecimalFormat("0.00"); // for rounding
+    int silverSound = 0;
+    boolean silverSoundExists;
+    boolean goldSoundExists;
+    int goldSound = 0;
 
     @Override
     public void init() {
@@ -26,59 +32,49 @@ public class mechanicDrive extends OpMode{
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        /*
+        int silverSoundID = hardwareMap.appContext.getResources().getIdentifier("silver", "raw", hardwareMap.appContext.getPackageName());
+        int goldSoundID   = hardwareMap.appContext.getResources().getIdentifier("gold",   "raw", hardwareMap.appContext.getPackageName());
+
+        if (goldSoundID != 0) {
+            goldFound = SoundPlayer.getInstance().preload(hardwareMap.appContext, goldSound);
+        }
+        if (silverSoundID != 0) {
+            silverFound = SoundPlayer.getInstance().preload(hardwareMap.appContext, silverSound);
+        }*/
     }
 
     @Override
     public void loop() {
-    setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+        setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+
+        if(gamepad1.right_bumper) {
+            slowSpeed = 1.00;
+        } else {
+            slowSpeed = 0.50;
+        }
     }
 
     public void setPowerMechanum(double x, double y, double rot) {//rot is short for rotation
         x = x * 1.1;
+        y = -y;
+        rot = -rot;
         //Code to calculate motor power
         double ratio = Math.max((Math.abs(y) + Math.abs(x) + Math.abs(rot)), 1);
-        double fRMotorPwr = (y - x - rot) / ratio;
-        double fLMotorPwr = (y + x + rot) / ratio;
-        double bRMotorPwr = (y + x - rot) / ratio;
-        double bLMotorPwr = (y - x + rot) / ratio;
-        /* This is the first version of algorithms
-        double fRMotorPwr = x - y - rot;
-        double fLMotorPwr = x + y + rot;
-        double bRMotorPwr = x + y - rot;
-        double bLMotorPwr = x - y + rot;
-         */
+        double fRMotorPwr = (y - x + rot) / ratio;
+        double fLMotorPwr = (-y - x + rot) / ratio;
+        double bRMotorPwr = (-y - x - rot) / ratio;
+        double bLMotorPwr = (y - x - rot) / ratio;
 
-        /*
-        double[] motorPwrs = {
+        telemetry.addData("fRMotorPwr", df.format(fRMotorPwr));
+        telemetry.addData("fLMotorPwr", df.format(fLMotorPwr));
+        telemetry.addData("bRMotorPwr", df.format(bRMotorPwr));
+        telemetry.addData("bLMotorPwr", df.format(bLMotorPwr));
 
-                Math.abs(fRMotorPwr),
-                Math.abs(fLMotorPwr),
-                Math.abs(bRMotorPwr),
-                Math.abs(bLMotorPwr)
-        };
-
-        Arrays.sort(motorPwrs);
-
-        if (motorPwrs[3] != 0){
-            fRMotorPwr = fRMotorPwr / motorPwrs[3];
-            fLMotorPwr = fLMotorPwr / motorPwrs[3];
-            bRMotorPwr = bRMotorPwr / motorPwrs[3];
-            bLMotorPwr = bLMotorPwr / motorPwrs[3];
-        }*/
-        telemetry.addData("fRMotorPwr", fRMotorPwr);
-        telemetry.addData("fLMotorPwr", fLMotorPwr);
-        telemetry.addData("bRMotorPwr", bRMotorPwr);
-        telemetry.addData("bLMotorPwr", bLMotorPwr);
-        try {
-            fR.setPower(fRMotorPwr * damper);
-            fL.setPower(fLMotorPwr * damper);
-            bR.setPower(bRMotorPwr * damper);
-            bL.setPower(bLMotorPwr * damper);
-        } catch(Exception e) {
-            telemetry.addData("Error", e);
-        }
-
-
-
+        fR.setPower(fRMotorPwr * totalSpeed * slowSpeed);
+        fL.setPower(fLMotorPwr * totalSpeed * slowSpeed);
+        bR.setPower(bRMotorPwr * totalSpeed * slowSpeed);
+        bL.setPower(bLMotorPwr * totalSpeed * slowSpeed);
     }
 }
