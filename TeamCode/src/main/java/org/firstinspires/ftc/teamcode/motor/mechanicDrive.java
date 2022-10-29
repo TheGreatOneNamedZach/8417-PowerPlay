@@ -26,6 +26,8 @@ public class mechanicDrive extends OpMode{
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
+        telemetry.addData("", "█");
+        telemetry.addData("", "↑");
     }
 
     @Override
