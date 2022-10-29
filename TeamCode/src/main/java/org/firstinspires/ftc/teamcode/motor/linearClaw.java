@@ -27,6 +27,7 @@ public class linearClaw extends OpMode {
         motorPower = (gamepad2.left_stick_y * -0.75);
         elevator.setPower(motorPower); // Gamepad 1 left joystick Y axis controls motor1
         telemetry.addData("Elevator", motorPower); // motor1 power
+        telemetry.addData("Pos", elevator.getCurrentPosition());
 
         if(gamepad2.left_stick_y == 0) { // If the joystick is at rest...
             if(!firstLoop) { // ...and the motor was NOT at rest in the last loop...
@@ -38,25 +39,16 @@ public class linearClaw extends OpMode {
                 while the motor is at rest.
                  */
             } else { // ...and the motor WAS at rest in the last loop...
-                if((elevator.getCurrentPosition() < motor1Pos - 5) || (elevator.getCurrentPosition() > motor1Pos + 5)) {
-                    // ...and the motor is no longer at the target position...
-                    elevator.setTargetPosition(motor1Pos); // Sets the target position
-                    elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    // Makes the positive direction the motor runs
-                    // towards the same direction you want it to go
-                    elevator.setPower(1);
-                }
+                elevator.setTargetPosition(motor1Pos); // Sets the target position
+                elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                // Makes the positive direction the motor runs
+                // towards the same direction you want it to go
+                elevator.setPower(0.75);
             }
-
-            if((elevator.getCurrentPosition() >= motor1Pos - 5) && (elevator.getCurrentPosition() <= motor1Pos + 5)) {
-                // ...and the motor is at the target position...
-                // ...stop the robot.
-                elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                elevator.setPower(0);
-            }
-
         } else { // If the joystick is NOT at rest...
+            elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             firstLoop = false;
+            elevator.setPower(motorPower);
         }
     }
 }

@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.motor;
 
-import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
 import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
@@ -18,10 +16,6 @@ public class mechanicDrive extends OpMode{
     double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
     double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
     static final DecimalFormat df = new DecimalFormat("0.00"); // for rounding
-    int silverSound = 0;
-    boolean silverSoundExists;
-    boolean goldSoundExists;
-    int goldSound = 0;
 
     @Override
     public void init() {
@@ -32,23 +26,11 @@ public class mechanicDrive extends OpMode{
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        /*
-        int silverSoundID = hardwareMap.appContext.getResources().getIdentifier("silver", "raw", hardwareMap.appContext.getPackageName());
-        int goldSoundID   = hardwareMap.appContext.getResources().getIdentifier("gold",   "raw", hardwareMap.appContext.getPackageName());
-
-        if (goldSoundID != 0) {
-            goldFound = SoundPlayer.getInstance().preload(hardwareMap.appContext, goldSound);
-        }
-        if (silverSoundID != 0) {
-            silverFound = SoundPlayer.getInstance().preload(hardwareMap.appContext, silverSound);
-        }*/
     }
 
     @Override
     public void loop() {
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
-
         if(gamepad1.right_bumper) {
             slowSpeed = 1.00;
         } else {
