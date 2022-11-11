@@ -27,7 +27,7 @@ public class linearClaw extends OpMode {
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
+    } //
 
 
     @Override
