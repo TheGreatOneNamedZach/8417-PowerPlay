@@ -13,7 +13,7 @@ public class mechanicDrive extends OpMode{
     DcMotor fL = null;
     DcMotor bR = null;
     DcMotor bL = null;
-    double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
+    static double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
     double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
     static final DecimalFormat df = new DecimalFormat("0.00"); // for rounding
 

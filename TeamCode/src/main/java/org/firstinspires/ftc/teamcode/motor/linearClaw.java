@@ -4,11 +4,15 @@ package org.firstinspires.ftc.teamcode.motor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name =  "Linear Claw", group = "e")
 public class linearClaw extends OpMode {
 
     DcMotor elevator = null;
+    Servo claw = null;
+    DigitalChannel digitalTouch;
     double motorPower; // Declares a double for telemetry and motor use
     int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
@@ -17,9 +21,13 @@ public class linearClaw extends OpMode {
     public void init() {
 
         elevator = hardwareMap.get(DcMotor.class, "Elevator");
+        claw = hardwareMap.get(Servo.class, "Claw");
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "sensor_digital");
+        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
 
     @Override
     public void loop() {
@@ -50,5 +58,27 @@ public class linearClaw extends OpMode {
             firstLoop = false;
             elevator.setPower(motorPower);
         }
+
+        clawControl(gamepad2.right_trigger);
+
+        if (digitalTouch.getState()) {
+            telemetry.addData("Digital Touch", "Is Not Pressed");
+        } else {
+            telemetry.addData("Digital Touch", "Is Pressed");
+        }
+    }
+
+    public void clawControl(double a) { //"a" is the variable being passed in for the claw to close/open
+
+        if(a != 0){
+            claw.setPosition(1);
+        }else{
+            claw.setPosition(-1);
+        }
     }
 }
+
+
+
+
+
