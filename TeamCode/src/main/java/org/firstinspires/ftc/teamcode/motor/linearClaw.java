@@ -27,50 +27,50 @@ public class linearClaw extends OpMode {
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    } //j
+    }
 
 
     @Override
     public void loop() {
-
+        telemetry.addData("GP2LS", gamepad2.left_stick_y);
         motorPower = (gamepad2.left_stick_y * -0.75);
-        elevator.setPower(motorPower); // Gamepad 1 left joystick Y axis controls motor1
-        telemetry.addData("Elevator", motorPower); // motor1 power
-        telemetry.addData("Pos", elevator.getCurrentPosition());
+        if (!(isPressed && gamepad2.left_stick_y > 0)) {
+            elevator.setPower(motorPower);
+            telemetry.addData("Elevator", motorPower); // motor1 power
+            telemetry.addData("Pos", elevator.getCurrentPosition());
 
-        if(!isPressed && gamepad2.left_stick_y == 0) { // If the joystick is at rest AND the slide is not at minimum position...
-            if(!firstLoop) { // ...and the motor was NOT at rest in the last loop...
-                motor1Pos = elevator.getCurrentPosition(); // ...get the motor position.
-                firstLoop = true;
+            if (gamepad2.left_stick_y == 0) { // If the joystick is at rest...
+                if (!firstLoop) { // ...and the motor was NOT at rest in the last loop...
+                    motor1Pos = elevator.getCurrentPosition(); // ...get the motor position.
+                    firstLoop = true;
                 /*
                 This says the motor has been at rest before.
                 This is so the motor postion is not constantly reset every loop iteration
                 while the motor is at rest.
                  */
-            } else { // ...and the motor WAS at rest in the last loop...
-                elevator.setTargetPosition(motor1Pos); // Sets the target position
-                elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                // Makes the positive direction the motor runs
-                // towards the same direction you want it to go
-                elevator.setPower(0.75);
-            }
-        } else { // If the joystick is NOT at rest...
-            elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            firstLoop = false;
-            if(isPressed && gamepad2.left_stick_y < 0) { // If the slide is at the minimum position...
+                } else { // ...and the motor WAS at rest in the last loop...
+                    elevator.setTargetPosition(motor1Pos); // Sets the target position
+                    elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    // Makes the positive direction the motor runs
+                    // towards the same direction you want it to go
+                    elevator.setPower(0.75);
+                }
+            } else { // If the joystick is NOT at rest...
+                elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                firstLoop = false;
                 elevator.setPower(motorPower);
             }
         }
-
         clawControl(gamepad2.right_trigger);
 
         if (digitalTouch.getState()) {
             telemetry.addData("Digital Touch", "Is Not Pressed");
-            boolean isPressed = false;
+            isPressed = false;
         } else {
             telemetry.addData("Digital Touch", "Is Pressed");
-            boolean isPressed = true;
+            isPressed = true;
         }
+
     }
 
     public void clawControl(double a) { //"a" is the variable being passed in for the claw to close/open
