@@ -16,6 +16,7 @@ public class linearClaw extends OpMode {
     double motorPower; // Declares a double for telemetry and motor use
     int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
+    boolean isPressed = false;
 
     @Override
     public void init() {
@@ -37,7 +38,7 @@ public class linearClaw extends OpMode {
         telemetry.addData("Elevator", motorPower); // motor1 power
         telemetry.addData("Pos", elevator.getCurrentPosition());
 
-        if(gamepad2.left_stick_y == 0) { // If the joystick is at rest...
+        if(!isPressed && gamepad2.left_stick_y == 0) { // If the joystick is at rest AND the slide is not at minimum position...
             if(!firstLoop) { // ...and the motor was NOT at rest in the last loop...
                 motor1Pos = elevator.getCurrentPosition(); // ...get the motor position.
                 firstLoop = true;
@@ -56,15 +57,19 @@ public class linearClaw extends OpMode {
         } else { // If the joystick is NOT at rest...
             elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             firstLoop = false;
-            elevator.setPower(motorPower);
+            if(isPressed && gamepad2.left_stick_y < 0) { // If the slide is at the minimum position...
+                elevator.setPower(motorPower);
+            }
         }
 
         clawControl(gamepad2.right_trigger);
 
         if (digitalTouch.getState()) {
             telemetry.addData("Digital Touch", "Is Not Pressed");
+            boolean isPressed = false;
         } else {
             telemetry.addData("Digital Touch", "Is Pressed");
+            boolean isPressed = true;
         }
     }
 
