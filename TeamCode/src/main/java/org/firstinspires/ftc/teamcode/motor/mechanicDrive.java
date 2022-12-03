@@ -72,7 +72,7 @@ public class mechanicDrive extends OpMode{
                     firstLoop = true;
                 /*
                 This says the motor has been at rest before.
-                This is so the motor postion is not constantly reset every loop iteration
+                This is so the motor position is not constantly reset every loop iteration
                 while the motor is at rest.
                  */
                 } else if (elevator.getCurrentPosition() < motor1Pos) { // ...and the motor WAS at rest in the last loop...
@@ -82,11 +82,17 @@ public class mechanicDrive extends OpMode{
                     // towards the same direction you want it to go
                     elevator.setPower(0.1);
                 }
-            } else { // If the joystick is NOT at rest...
+            }
+            else { // If the joystick is NOT at rest...
                 elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 firstLoop = false;
                 elevator.setPower(motorPower);
             }
+        }
+        if(gamepad2.dpad_down){
+            elevator.setPower(0.6);
+            elevator.setTargetPosition(1400);
+            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         clawControl(gamepad2.right_bumper);
 
