@@ -61,7 +61,7 @@ public class linearClaw extends OpMode {
                 elevator.setPower(motorPower);
             }
         }
-        clawControl(gamepad2.right_trigger);
+        clawControl(gamepad2.right_bumper);
 
         if (digitalTouch.getState()) {
             telemetry.addData("Digital Touch", "Is Not Pressed");
@@ -73,12 +73,11 @@ public class linearClaw extends OpMode {
 
     }
 
-    public void clawControl(double a) { //"a" is the variable being passed in for the claw to close/open
-
-        if(a != 0){
-            claw.setPosition(1);
+    public void clawControl(boolean a) { //"a" is the variable being passed in for the claw to close/open
+        if(a){
+            claw.setPosition(.64);
         }else{
-            claw.setPosition(-1);
+            claw.setPosition(.42);
         }
     }
 }
