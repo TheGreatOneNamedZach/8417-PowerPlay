@@ -9,20 +9,18 @@ public class servoPro extends OpMode {
     Servo claw;
     @Override
     public void init() {
-        claw = hardwareMap.get(Servo.class, "Claw");
+        claw = hardwareMap.get(Servo.class, "Swivel");
     }
 
     @Override
     public void loop() {
         telemetry.addData("Pos", claw.getPosition());
-        if (gamepad2.right_stick_x > 0.42) {
+        if (gamepad2.right_stick_x > 0.55) {
             claw.setPosition(gamepad2.right_stick_x);
-        }
-        /*
-        if(gamepad2.a) {
+        } else if(gamepad2.a) {
             claw.setPosition(.57);
         } else {
             claw.setPosition(0.42);
-        }*/
+        }
     }
 }
