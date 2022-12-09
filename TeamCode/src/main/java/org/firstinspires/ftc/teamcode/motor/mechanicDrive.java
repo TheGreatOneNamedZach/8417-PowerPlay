@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.text.DecimalFormat;
 
@@ -19,6 +20,7 @@ public class mechanicDrive extends OpMode{
     static double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
     double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
     static final DecimalFormat df = new DecimalFormat("0.00"); // for rounding
+    public ElapsedTime timer = new ElapsedTime();
 
     DcMotor elevator = null;
     Servo claw = null;
@@ -27,6 +29,15 @@ public class mechanicDrive extends OpMode{
     int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
     boolean isPressed = false;
+
+    double p;
+    double i = 0; // Must never be null
+    double d;
+    double k_p = 0.2; // Rate of power change based on error
+    double k_i = 0;
+    double k_d = 3;
+    double lastTime = -1;
+    double lastError = -1;
 
     @Override
     public void init() {
@@ -76,11 +87,7 @@ public class mechanicDrive extends OpMode{
                 while the motor is at rest.
                  */
                 } else if (elevator.getCurrentPosition() < motor1Pos) { // ...and the motor WAS at rest in the last loop...
-                    elevator.setTargetPosition(motor1Pos); // Sets the target position
-                    elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    // Makes the positive direction the motor runs
-                    // towards the same direction you want it to go
-                    elevator.setPower(0.1);
+                    slideControl(motor1Pos);
                 }
             }
             else { // If the joystick is NOT at rest...
@@ -135,5 +142,47 @@ public class mechanicDrive extends OpMode{
             claw.setPosition(.42);
             telemetry.addData("Claw", "Closed");
         }
+    }
+
+    public void slideControl(int targetPos) {
+        /*
+         * The linear slide knows where it is at all times.
+         * It knows this because it knows where it isn't.
+         * By subtracting where it is from where it isn't,
+         * or where it isn't from where it is (whichever is greater),
+         * it obtains a difference, or deviation.
+         * The PID system uses deviations to generate corrective commands
+         * to drive the linear side from a position where it is to a position where it isn't,
+         * and arriving at a position where it wasn't, it now is.
+         * Consequently, the position where it is, is now the position that it wasn't,
+         * and it follows that the position that it was, is now the position that it isn't.
+         * In the event that the position that it is in is not the position that it wasn't,
+         * the PID system has acquired a variation, the variation being the difference
+         * between where the linear slide is, and where it wasn't.
+         * If variation is considered to be a significant factor,
+         * it too may be corrected by the PID.
+         * However, the linear slide must also know where it was.
+         * The linear slide PID system works as follows.
+         * Because a variation has modified some of the information the linear slide has obtained,
+         * it is not sure just where it is.
+         * However, it is sure where it isn't, within reason, and it knows where it was.
+         * It now subtracts where it should be from where it wasn't,
+         * or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be,
+         * and where it was, it is able to obtain the deviation and its variation, which is called error.
+         */
+        double currentTime = timer.milliseconds();
+        double currentError = targetPos - elevator.getCurrentPosition();
+
+        p = k_p * currentError;
+        i += k_i * (currentError * (currentTime - lastTime));
+        i = Math.max(i, -1);
+        i = Math.min(i, 1);
+        d = k_d * (currentError - lastError) / (currentTime - lastTime);
+
+        elevator.setPower(0.01 * (p + i + d));
+        telemetry.addData("",0.01 * (p + i + d));
+
+        lastTime = currentTime;
+        lastError = currentError;
     }
 }
