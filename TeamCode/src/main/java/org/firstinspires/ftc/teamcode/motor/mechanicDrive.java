@@ -100,7 +100,16 @@ public class mechanicDrive extends OpMode{
             elevator.setPower(0.6);
             elevator.setTargetPosition(1400);
             elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        } else if(gamepad2.dpad_left){
+            elevator.setPower(0.6);
+            elevator.setTargetPosition(2260);
+            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        } else if(gamepad2.dpad_up){
+            elevator.setPower(0.6);
+            elevator.setTargetPosition(3600);
+            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
+
         clawControl(gamepad2.right_bumper);
 
         if (digitalTouch.getState()) {
@@ -137,12 +146,48 @@ public class mechanicDrive extends OpMode{
     public void clawControl(boolean a) { //"a" is the variable being passed in for the claw to close/open
         if(a){
             claw.setPosition(.64);
-            telemetry.addData("Claw", "Open");
+            telemetry.addData("Claw", "Closed");
         }else{
             claw.setPosition(.42);
-            telemetry.addData("Claw", "Closed");
+            telemetry.addData("Claw", "Open");
         }
     }
+
+    /*
+    * If added, this code will presumably allow the right bumper to be used as a toggle (on/off)
+    * switch, reducing the chances of user error when piloting the robot.
+    *
+    * This portion specifically is the on/off portion. It uses the controller's built-in boolean
+    * value together with whether or not the claw itself is open or closed to change the value to
+    * opposite of what it is.
+
+    boolean closed = false;
+
+    public void clawControl(boolean a) {
+        if(a && !closed){
+            closed = true;
+        } else if(a && closed){
+            closed = false;
+        }
+
+    * This portion of the code (still under the claw control function) opens and closes the claw
+    * itself
+
+        if(!closed){
+            claw.setPosition(.42);
+            telemetry.addData(caption:"Claw", value:"Open");
+        } else if(closed){
+            claw.setPosition(.64);
+            telemetry.addData(caption:"Claw", value:"Open");
+        }
+     }
+    * The user can now use a single press on the bumper with this code, because the robot now
+    * understands whether or not the claw is open or closed, by knowing that the opposite is, in
+    * fact, quite true. Knowing whether it is not opened or not closed, allows the robot, at a push
+    * of a button, to say that now it is that which it wasn't. Knowing that is wasn't what it now is,
+    * the robot can now say that it is what it isn't, allowing it to move and hold a servo motor
+    * in the position that the robot now knows it needs to be in.
+    */
 
     public void slideControl(int targetPos) {
         /*
