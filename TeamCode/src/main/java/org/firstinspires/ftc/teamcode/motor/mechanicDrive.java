@@ -142,7 +142,7 @@ public class mechanicDrive extends OpMode{
         bR.setPower(bRMotorPwr * totalSpeed * slowSpeed);
         bL.setPower(bLMotorPwr * totalSpeed * slowSpeed);
     }
-
+/*
     public void clawControl(boolean a) { //"a" is the variable being passed in for the claw to close/open
         if(a){
             claw.setPosition(.64);
@@ -153,6 +153,8 @@ public class mechanicDrive extends OpMode{
         }
     }
 
+ */
+
     /*
     * If added, this code will presumably allow the right bumper to be used as a toggle (on/off)
     * switch, reducing the chances of user error when piloting the robot.
@@ -160,27 +162,27 @@ public class mechanicDrive extends OpMode{
     * This portion specifically is the on/off portion. It uses the controller's built-in boolean
     * value together with whether or not the claw itself is open or closed to change the value to
     * opposite of what it is.
-
+*/
     boolean closed = false;
 
-    public void clawControl(boolean a) {
-        if(a && !closed){
+    public void clawControl(boolean bumpPress) {
+        if(bumpPress && !closed){
             closed = true;
-        } else if(a && closed){
+        } else if(bumpPress){
             closed = false;
         }
-
-    * This portion of the code (still under the claw control function) opens and closes the claw
-    * itself
+    //This portion of the code (still under the claw control function) opens and closes the claw
+    //itself
 
         if(!closed){
             claw.setPosition(.42);
-            telemetry.addData(caption:"Claw", value:"Open");
-        } else if(closed){
+            telemetry.addData("Claw", "Open");
+        } else {
             claw.setPosition(.64);
-            telemetry.addData(caption:"Claw", value:"Open");
+            telemetry.addData("Claw", "Open");
         }
      }
+     /*
     * The user can now use a single press on the bumper with this code, because the robot now
     * understands whether or not the claw is open or closed, by knowing that the opposite is, in
     * fact, quite true. Knowing whether it is not opened or not closed, allows the robot, at a push
