@@ -110,6 +110,7 @@ public class mechanicDrive extends OpMode{
             elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
 
+
         clawControl(gamepad2.right_bumper);
 
         if (digitalTouch.getState()) {
@@ -164,6 +165,7 @@ public class mechanicDrive extends OpMode{
     * opposite of what it is.
 */
     boolean closed = false;
+    boolean buttonRelease = true;
 
     public void clawControl(boolean bumpPress) {
         if(bumpPress && !closed){
@@ -174,12 +176,16 @@ public class mechanicDrive extends OpMode{
     //This portion of the code (still under the claw control function) opens and closes the claw
     //itself
 
-        if(!closed){
+        if(!closed && buttonRelease){
             claw.setPosition(.42);
             telemetry.addData("Claw", "Open");
-        } else {
+            buttonRelease = false;
+        } else if(closed && buttonRelease){
             claw.setPosition(.64);
             telemetry.addData("Claw", "Open");
+            buttonRelease = false;
+        } else if(!bumpPress){
+            buttonRelease = true;
         }
      }
      /*
