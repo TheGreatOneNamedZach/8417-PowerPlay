@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
-public class mechanicDrive extends OpMode{
+public class mechanicDrive extends OpMode {
 
     DcMotor fR = null;
     DcMotor fL = null;
@@ -21,9 +21,12 @@ public class mechanicDrive extends OpMode{
     double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
     static final DecimalFormat df = new DecimalFormat("0.00"); // for rounding
     public ElapsedTime timer = new ElapsedTime();
+    public ElapsedTime clawTimer = new ElapsedTime();
+    public ElapsedTime swivelTimer = new ElapsedTime();
 
     DcMotor elevator = null;
     Servo claw = null;
+    Servo swivel = null;
     DigitalChannel digitalTouch;
     double motorPower; // Declares a double for telemetry and motor use
     int motor1Pos = 0; // This saves the motor position when it is first at rest
@@ -34,7 +37,7 @@ public class mechanicDrive extends OpMode{
     double i = 0; // Must never be null
     double d;
     double k_p = 0.2; // Rate of power change based on error
-    double k_i = 0;
+    double k_i = 0; // Jumpstarts the slide if it stalls
     double k_d = 3;
     double lastTime = -1;
     double lastError = -1;
@@ -55,6 +58,7 @@ public class mechanicDrive extends OpMode{
 
         elevator = hardwareMap.get(DcMotor.class, "Elevator");
         claw = hardwareMap.get(Servo.class, "Claw");
+        swivel = hardwareMap.get(Servo.class, "Swivel");
         digitalTouch = hardwareMap.get(DigitalChannel.class, "sensor_digital");
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -64,7 +68,7 @@ public class mechanicDrive extends OpMode{
     @Override
     public void loop() {
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
-        if(gamepad1.right_bumper) {
+        if (gamepad1.right_bumper) {
             slowSpeed = 1.00;
         } else {
             slowSpeed = 0.50;
@@ -89,22 +93,21 @@ public class mechanicDrive extends OpMode{
                 } else if (elevator.getCurrentPosition() < motor1Pos) { // ...and the motor WAS at rest in the last loop...
                     slideControl(motor1Pos);
                 }
-            }
-            else { // If the joystick is NOT at rest...
+            } else { // If the joystick is NOT at rest...
                 elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 firstLoop = false;
                 elevator.setPower(motorPower);
             }
         }
-        if(gamepad2.dpad_down){
+        if (gamepad2.dpad_down) {
             elevator.setPower(0.6);
             elevator.setTargetPosition(1400);
             elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if(gamepad2.dpad_left){
+        } else if (gamepad2.dpad_left) {
             elevator.setPower(0.6);
             elevator.setTargetPosition(2260);
             elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if(gamepad2.dpad_up){
+        } else if (gamepad2.dpad_up) {
             elevator.setPower(0.6);
             elevator.setTargetPosition(3600);
             elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -112,6 +115,7 @@ public class mechanicDrive extends OpMode{
 
 
         clawControl(gamepad2.right_bumper);
+        swivelControl(gamepad1.left_bumper);
 
         if (digitalTouch.getState()) {
             telemetry.addData("Digital Touch", "Is Not Pressed");
@@ -120,6 +124,7 @@ public class mechanicDrive extends OpMode{
             telemetry.addData("Digital Touch", "Is Pressed");
             isPressed = true;
         }
+        telemetry.addData("Swivel", turned);
     }
 
     public void setPowerMechanum(double x, double y, double rot) {//rot is short for rotation
@@ -157,85 +162,125 @@ public class mechanicDrive extends OpMode{
  */
 
     /*
-    * If added, this code will presumably allow the right bumper to be used as a toggle (on/off)
-    * switch, reducing the chances of user error when piloting the robot.
-    *
-    * This portion specifically is the on/off portion. It uses the controller's built-in boolean
-    * value together with whether or not the claw itself is open or closed to change the value to
-    * opposite of what it is.
-*/
+     * If added, this code will presumably allow the right bumper to be used as a toggle (on/off)
+     * switch, reducing the chances of user error when piloting the robot.
+     *
+     * This portion specifically is the on/off portion. It uses the controller's built-in boolean
+     * value together with whether or not the claw itself is open or closed to change the value to
+     * opposite of what it is.
+     */
     boolean closed = false;
-    boolean buttonRelease = true;
 
     public void clawControl(boolean bumpPress) {
-        if(bumpPress && !closed){
+        /*
+        if (bumpPress && !closed) {
             closed = true;
-        } else if(bumpPress){
+        } else if (bumpPress) {
             closed = false;
-        }
-    //This portion of the code (still under the claw control function) opens and closes the claw
-    //itself
+        }*/
 
-        if(!closed && buttonRelease){
+        //This portion of the code (still under the claw control function) opens and closes the claw
+        //itself
+
+        if (bumpPress && clawTimer.time() >= 1.00) {
+            if (closed) {
+                claw.setPosition(.64);
+                telemetry.addData("Claw", "Open");
+                closed = false;
+            } else {
+                claw.setPosition(.42);
+                telemetry.addData("Claw", "Open");
+                closed = true;
+            }
+            clawTimer.reset();
+        }
+        /*
             claw.setPosition(.42);
             telemetry.addData("Claw", "Open");
             buttonRelease = false;
-        } else if(closed && buttonRelease){
+
+         else if(buttonRelease && clawTimer.time() >= 1.00){
             claw.setPosition(.64);
             telemetry.addData("Claw", "Open");
             buttonRelease = false;
         } else if(!bumpPress){
             buttonRelease = true;
-        }
-     }
-     /*
-    * The user can now use a single press on the bumper with this code, because the robot now
-    * understands whether or not the claw is open or closed, by knowing that the opposite is, in
-    * fact, quite true. Knowing whether it is not opened or not closed, allows the robot, at a push
-    * of a button, to say that now it is that which it wasn't. Knowing that is wasn't what it now is,
-    * the robot can now say that it is what it isn't, allowing it to move and hold a servo motor
-    * in the position that the robot now knows it needs to be in.
-    */
-
-    public void slideControl(int targetPos) {
-        /*
-         * The linear slide knows where it is at all times.
-         * It knows this because it knows where it isn't.
-         * By subtracting where it is from where it isn't,
-         * or where it isn't from where it is (whichever is greater),
-         * it obtains a difference, or deviation.
-         * The PID system uses deviations to generate corrective commands
-         * to drive the linear side from a position where it is to a position where it isn't,
-         * and arriving at a position where it wasn't, it now is.
-         * Consequently, the position where it is, is now the position that it wasn't,
-         * and it follows that the position that it was, is now the position that it isn't.
-         * In the event that the position that it is in is not the position that it wasn't,
-         * the PID system has acquired a variation, the variation being the difference
-         * between where the linear slide is, and where it wasn't.
-         * If variation is considered to be a significant factor,
-         * it too may be corrected by the PID.
-         * However, the linear slide must also know where it was.
-         * The linear slide PID system works as follows.
-         * Because a variation has modified some of the information the linear slide has obtained,
-         * it is not sure just where it is.
-         * However, it is sure where it isn't, within reason, and it knows where it was.
-         * It now subtracts where it should be from where it wasn't,
-         * or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be,
-         * and where it was, it is able to obtain the deviation and its variation, which is called error.
-         */
-        double currentTime = timer.milliseconds();
-        double currentError = targetPos - elevator.getCurrentPosition();
-
-        p = k_p * currentError;
-        i += k_i * (currentError * (currentTime - lastTime));
-        i = Math.max(i, -1);
-        i = Math.min(i, 1);
-        d = k_d * (currentError - lastError) / (currentTime - lastTime);
-
-        elevator.setPower(0.01 * (p + i + d));
-        telemetry.addData("",0.01 * (p + i + d));
-
-        lastTime = currentTime;
-        lastError = currentError;
+        } */
     }
-}
+
+    boolean turned = false;
+
+    public void swivelControl(boolean leftBumpPress) {
+
+        /*
+        if (leftBumpPress && !turned) {
+            turned = true;
+        } else if (leftBumpPress) {
+            turned = false;
+        }
+
+         */
+
+        if (leftBumpPress && swivelTimer.time() >= 1.00) {
+            if (turned) {
+                swivel.setPosition(0.6);
+                turned = false;
+            } else {
+                swivel.setPosition(0.72);
+                turned = true;
+            }
+            swivelTimer.reset();
+        }
+
+
+        /*
+         * The user can now use a single press on the bumper with this code, because the robot now
+         * understands whether or not the claw is open or closed, by knowing that the opposite is, in
+         * fact, quite true. Knowing whether it is not opened or not closed, allows the robot, at a push
+         * of a button, to say that now it is that which it wasn't. Knowing that is wasn't what it now is,
+         * the robot can now say that it is what it isn't, allowing it to move and hold a servo motor
+         * in the position that the robot now knows it needs to be in.
+         */
+    }
+        public void slideControl (int targetPos){
+            /*
+             * The linear slide knows where it is at all times.
+             * It knows this because it knows where it isn't.
+             * By subtracting where it is from where it isn't,
+             * or where it isn't from where it is (whichever is greater),
+             * it obtains a difference, or deviation.
+             * The PID system uses deviations to generate corrective commands
+             * to drive the linear side from a position where it is to a position where it isn't,
+             * and arriving at a position where it wasn't, it now is.
+             * Consequently, the position where it is, is now the position that it wasn't,
+             * and it follows that the position that it was, is now the position that it isn't.
+             * In the event that the position that it is in is not the position that it wasn't,
+             * the PID system has acquired a variation, the variation being the difference
+             * between where the linear slide is, and where it wasn't.
+             * If variation is considered to be a significant factor,
+             * it too may be corrected by the PID.
+             * However, the linear slide must also know where it was.
+             * The linear slide PID system works as follows.
+             * Because a variation has modified some of the information the linear slide has obtained,
+             * it is not sure just where it is.
+             * However, it is sure where it isn't, within reason, and it knows where it was.
+             * It now subtracts where it should be from where it wasn't,
+             * or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be,
+             * and where it was, it is able to obtain the deviation and its variation, which is called error.
+             */
+            double currentTime = timer.milliseconds();
+            double currentError = targetPos - elevator.getCurrentPosition();
+
+            p = k_p * currentError;
+            i += k_i * (currentError * (currentTime - lastTime));
+            i = Math.max(i, -1);
+            i = Math.min(i, 1);
+            d = k_d * (currentError - lastError) / (currentTime - lastTime);
+
+            elevator.setPower(0.01 * (p + i + d));
+            telemetry.addData("", 0.01 * (p + i + d));
+
+            lastTime = currentTime;
+            lastError = currentError;
+        }
+    }
