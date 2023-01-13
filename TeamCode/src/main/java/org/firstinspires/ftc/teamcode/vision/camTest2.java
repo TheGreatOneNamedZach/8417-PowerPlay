@@ -50,7 +50,7 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "Tensor FLow cam test", group = "test")
+@TeleOp(name = "Tensor Flow cam test", group = "test")
 public class camTest2 extends LinearOpMode {
 
     /*
@@ -60,14 +60,14 @@ public class camTest2 extends LinearOpMode {
      * has been downloaded to the Robot Controller's SD FLASH memory, it must to be loaded using loadModelFromFile()
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
-    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-    // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/CustomTeamModel.tflite";
+    private static final String TFOD_MODEL_ASSET = "model_unquant.tflite";
+    // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_unquant.tflite";
 
 
     private static final String[] LABELS = {
-            "1 Bolt",
-            "2 Bulb",
-            "3 Panel"
+            "0 Turtle",
+            "1 Robot",
+            "2 Handsaw"
     };
 
     /*
@@ -103,10 +103,10 @@ public class camTest2 extends LinearOpMode {
         initVuforia();
         initTfod();
 
-        /**
+        /*
          * Activate TensorFlow Object Detection before we wait for the start command.
          * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
-         **/
+         */
         if (tfod != null) {
             tfod.activate();
 
@@ -119,7 +119,7 @@ public class camTest2 extends LinearOpMode {
             tfod.setZoom(1.0, 16.0/9.0);
         }
 
-        /** Wait for the game to begin */
+        /* Wait for the game to begin */
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
         waitForStart();
