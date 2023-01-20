@@ -94,10 +94,13 @@ public class autoSafetyNet extends OpMode {
 
 
     public void encoderDrive(double speed, double leftInches, double rightInches) {
+        boolean runOnce = false;
+        int leftFrontTarget = 0;
+        int rightBackTarget = 0;
         if(!runOnce) {
             leftFrontTarget = 0;
-            rightFrontTarget = 0;
-            leftBackTarget = 0;
+            int rightFrontTarget = 0;
+            int leftBackTarget = 0;
             rightBackTarget = 0;
 
             leftFrontTarget = /*fL.getCurrentPosition() +*/ (int) (leftInches * TICKS_PER_INCH);
@@ -149,7 +152,7 @@ public class autoSafetyNet extends OpMode {
                 fL.setPower(0);
                 bL.setPower(0);
 
-                ififrun = true;
+                boolean ififrun = true;
                 // Changed the motor type to "run using encoders"
                 //fR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 bR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -163,9 +166,9 @@ public class autoSafetyNet extends OpMode {
                 fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 runtime.reset();
                 runOnce = false;
+                int ifLoopCount = 0;
                 ifLoopCount++;
             }
         }
     }
-}
 }
