@@ -33,9 +33,9 @@ public class mechanicDrive extends OpMode {
     boolean firstLoop = false;
     boolean isPressed = false;
 
-    double p;
+    double p = +.15;
     double i = 0; // Must never be null
-    double d;
+    double d = .15;
     double k_p = 0.2; // Rate of power change based on error
     double k_i = 0; // Jumpstarts the slide if it stalls
     double k_d = 3;
@@ -277,8 +277,7 @@ public class mechanicDrive extends OpMode {
             i = Math.min(i, 1);
             d = k_d * (currentError - lastError) / (currentTime - lastTime);
 
-            //elevator.setPower(0.01 * (p + i + d));
-            elevator.setPower(0.01);
+            elevator.setPower(0.01 * (p + i + d));
             telemetry.addData("", 0.01 * (p + i + d));
 
             lastTime = currentTime;
