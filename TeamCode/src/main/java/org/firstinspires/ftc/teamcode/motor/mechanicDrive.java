@@ -277,7 +277,8 @@ public class mechanicDrive extends OpMode {
             i = Math.min(i, 1);
             d = k_d * (currentError - lastError) / (currentTime - lastTime);
 
-            elevator.setPower(0.01 * (p + i + d));
+            //elevator.setPower(0.01 * (p + i + d));
+            elevator.setPower(0.01);
             telemetry.addData("", 0.01 * (p + i + d));
 
             lastTime = currentTime;

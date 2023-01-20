@@ -15,160 +15,128 @@ public class autoSafetyNet extends OpMode {
     DcMotor bL = null;
     public ElapsedTime runtime = new ElapsedTime();
     int isLoop = 0;
+    double length = 1.0;
+    double slow = .5;
 
     static final double TICKS_PER_REV = 1120;
     static final double wheelDiameter = 4.72441;
     static final double TICKS_PER_INCH = TICKS_PER_REV / (wheelDiameter * Math.PI);
 
     public void init(){
-        fR.setDirection(DcMotorSimple.Direction.REVERSE);
+        fR = hardwareMap.get(DcMotor.class, "Front Right");
+        fL = hardwareMap.get(DcMotor.class, "Front Left");
+        bR = hardwareMap.get(DcMotor.class, "Back Right");
+        bL = hardwareMap.get(DcMotor.class, "Back Left");
+
+        bL.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void loop() {
+        telemetry.addData("Time elapsed", runtime.time());
+        telemetry.addData("isLoop", isLoop);
         if(true) {
             //Should be code for left parking spot.
-            if (isLoop == 0) {
-                encoderDrive(.5, 24, 24);
+            if(isLoop == 0){
+                encoderDrive(length, 0, 0, 0);
             }
-            if (runtime.time() >= 0.500 && isLoop == 1) {
-                encoderDrive(.5, -5, 5);
+            if(isLoop == 1){
+                encoderDrive(.2, 1, 0, 0);
             }
-            if (runtime.time() >= 0.500 && isLoop == 2) {
-                encoderDrive(.5, 24, 24);
+            if(isLoop == 2){
+                encoderDrive(.2, 0,0,0);
             }
-            if(runtime.time() >= .500 && isLoop == 3) {
-                encoderDrive(.5, 5, -5);
+            if (isLoop == 3) {
+                encoderDrive(length, 0,  1, 0);
             }
-            if(runtime.time() >= .500 && isLoop == 4) {
-                encoderDrive(.5, 12, 12);
+            if(isLoop == 4){
+                encoderDrive(.2, 0,0,0);
+            }
+            if (isLoop == 5) {
+                encoderDrive(length,1, 0, 0);
+            }
+            if(isLoop == 6){
+                encoderDrive(length, 0,0,0);
             }
         }
+
 
         //Should be code for front parking spot
 
         if (false) {
-            if(isLoop == 0) {
-                encoderDrive(.5, 36, 36);
+            if(isLoop == 0){
+                encoderDrive(length, 0,0,0);
+            }
+            if(isLoop == 1) {
+                encoderDrive(length + .5, 1, 0, 0);
+            }
+            if(isLoop == 2){
+                encoderDrive(length,0,0,0);
             }
         }
 
         //Should be code for right parking spot
         if(false) {
-            if(isLoop == 0) {
-                encoderDrive(.5, 24, 24);
+            if(isLoop == 0){
+                encoderDrive(length,0,0,0);
             }
-            if(runtime.time() >= .500 && isLoop == 1) {
-                encoderDrive(.5, 5, -5);
+            if(isLoop == 1) {
+                encoderDrive(.2, 1, 0, 0);
             }
-            if(runtime.time() >= .500 && isLoop == 2) {
-                encoderDrive(.5, 24, 24);
+            if(isLoop == 2){
+                encoderDrive(.2,0,0,0);
             }
-            if(runtime.time() >= .500 && isLoop == 3) {
-                encoderDrive(.5, -5, 5);
+            if(isLoop == 3) {
+                encoderDrive(length, 0, -1, 0);
             }
-            if (runtime.time() >= .500 && isLoop == 4) {
-                encoderDrive(.5, 12, 12);
+            if(isLoop == 4){
+                encoderDrive(.2,0,0,0);
+            }
+            if(isLoop == 5) {
+                encoderDrive(length, 1, 0, 0);
+            }
+            if(isLoop == 6) {
+                encoderDrive(.2, 0, 0, 0);
             }
         }
 
         //If it just so happens to not see images or gets super confused;
         if(false) {
             if(isLoop == 0) {
-                encoderDrive(.5, 5, -5);
-            }
-            if(runtime.time() >= .500 && isLoop == 1) {
-                encoderDrive(.5, 24, 24);
+                encoderDrive(length,0, 1, 0);
             }
         }
-        isLoop++;
     }
 
+        public void encoderDrive(double lengthy, double x, double y, double rot) {//rot is short for rotation
+            x = x * 1.1;
+            y = -y;
+            rot = -rot;
+            //Code to calculate motor power
+            double ratio = Math.max((Math.abs(y) + Math.abs(x) + Math.abs(rot)), 1);
+            double fRMotorPwr = (y - x + rot) / ratio;
+            double fLMotorPwr = (-y - x + rot) / ratio;
+            double bRMotorPwr = (-y - x - rot) / ratio;
+            double bLMotorPwr = (y - x - rot) / ratio;
 
+            telemetry.addData("fRMotorPwr", fRMotorPwr);
+            telemetry.addData("fLMotorPwr", fLMotorPwr);
+            telemetry.addData("bRMotorPwr", bRMotorPwr);
+            telemetry.addData("bLMotorPwr", bLMotorPwr);
 
-
-    public void encoderDrive(double speed, double leftInches, double rightInches) {
-        boolean runOnce = false;
-        int leftFrontTarget = 0;
-        int rightBackTarget = 0;
-        if(!runOnce) {
-            leftFrontTarget = 0;
-            int rightFrontTarget = 0;
-            int leftBackTarget = 0;
-            rightBackTarget = 0;
-
-            leftFrontTarget = /*fL.getCurrentPosition() +*/ (int) (leftInches * TICKS_PER_INCH);
-            rightFrontTarget = /*fR.getCurrentPosition() +*/ (int) (rightInches * TICKS_PER_INCH);
-            leftBackTarget = /*bL.getCurrentPosition() +*/ (int) (leftInches * TICKS_PER_INCH);
-            rightBackTarget = /*bR.getCurrentPosition() +*/ (int) (rightInches * TICKS_PER_INCH);
-
-            // Telling the motors how many ticks I want them to go and then to stop
-            if(leftBackTarget < 0) {
-                bL.setTargetPosition(leftBackTarget - (int) TICKS_PER_REV);
-                fL.setTargetPosition(leftFrontTarget - (int) TICKS_PER_REV);
-            } else {
-                bL.setTargetPosition(leftBackTarget + (int) TICKS_PER_REV);
-                fL.setTargetPosition(leftFrontTarget + (int) TICKS_PER_REV);
-            }
-
-            if(rightBackTarget < 0) {
-                fR.setTargetPosition(rightFrontTarget - (int) TICKS_PER_REV);
-                bR.setTargetPosition(rightBackTarget - (int) TICKS_PER_REV);
-            } else {
-                fR.setTargetPosition(rightFrontTarget + (int) TICKS_PER_REV);
-                bR.setTargetPosition(rightBackTarget + (int) TICKS_PER_REV);
-            }
-
-            // Changes motor mode to "run to position"
-            //fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // Sending power to motors
-            if(rightInches < 0) {
-                fR.setPower(-speed);
-            } else {
-                fR.setPower(speed);
-            }
-            bR.setPower(speed);
-            bL.setPower(speed);
-            fL.setPower(speed);
-            runOnce = true;
-        }
-
-        if(((Math.round(Math.abs(fL.getCurrentPosition() + bL.getCurrentPosition()))/2) >= Math.abs(leftFrontTarget))/*((Math.round(Math.abs(fL.getCurrentPosition() + bL.getCurrentPosition()))/2) >= Math.abs(leftFrontTarget)) && Math.round(Math.abs(bR.getCurrentPosition())) >= Math.abs(rightBackTarget)*/) {
-            if (Math.round(Math.abs(bR.getCurrentPosition())) >= Math.abs(rightBackTarget)) {
-                // Takes the average, absolute value of both sides and makes sure one of them is above their target position
-                // Stops the motors after they reach the position
-                fR.setPower(0);
-                bR.setPower(0);
-                fL.setPower(0);
-                bL.setPower(0);
-
-                boolean ififrun = true;
-                // Changed the motor type to "run using encoders"
-                //fR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                bR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                bL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                fL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                // Resets encoder ticks
-                fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            fR.setPower(fRMotorPwr * slow);
+            fL.setPower(fLMotorPwr * slow);
+            bR.setPower(bRMotorPwr * slow);
+            bL.setPower(bLMotorPwr * slow);
+            if(runtime.time() >= lengthy){
+                isLoop++;
                 runtime.reset();
-                runOnce = false;
-                int ifLoopCount = 0;
-                ifLoopCount++;
             }
         }
-    }
 }
