@@ -7,6 +7,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.vision.tensorFlow8417_new;
+
+import java.util.Objects;
+
 @Autonomous
 public class autoSafetyNet extends OpMode {
     DcMotor fR = null;
@@ -17,10 +21,9 @@ public class autoSafetyNet extends OpMode {
     int isLoop = 0;
     double length = 1.0;
     double slow = .5;
-
-    static final double TICKS_PER_REV = 1120;
-    static final double wheelDiameter = 4.72441;
-    static final double TICKS_PER_INCH = TICKS_PER_REV / (wheelDiameter * Math.PI);
+    org.firstinspires.ftc.teamcode.vision.tensorFlow8417_new detector = new tensorFlow8417_new();
+    String duck = null; //Zach misspoke, so here it is now.
+    String tempDuck = null;
 
     public void init(){
         fR = hardwareMap.get(DcMotor.class, "Front Right");
@@ -35,13 +38,28 @@ public class autoSafetyNet extends OpMode {
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        detector.init(this);
+        detector.initVuforia();
+        detector.initTfod();
+    }
+
+    public void init_loop(){
+        tempDuck = detector.imageReturn();
+        if(tempDuck != null){
+            duck = tempDuck;
+        }
+        telemetry.addData("label", duck);
     }
 
     @Override
     public void loop() {
         telemetry.addData("Time elapsed", runtime.time());
         telemetry.addData("isLoop", isLoop);
-        if(true) {
+
+
+
+        if(Objects.equals(duck, "1 Bolt")) {
             //Should be code for left parking spot.
             if(isLoop == 0){
                 encoderDrive(length, 0, 0, 0);
@@ -69,7 +87,7 @@ public class autoSafetyNet extends OpMode {
 
         //Should be code for front parking spot
 
-        if (false) {
+        if (Objects.equals(duck, "2 Bulb")) {
             if(isLoop == 0){
                 encoderDrive(length, 0,0,0);
             }
@@ -82,7 +100,7 @@ public class autoSafetyNet extends OpMode {
         }
 
         //Should be code for right parking spot
-        if(false) {
+        if(Objects.equals(duck, "3 Panel")) {
             if(isLoop == 0){
                 encoderDrive(length,0,0,0);
             }
@@ -105,14 +123,9 @@ public class autoSafetyNet extends OpMode {
                 encoderDrive(.2, 0, 0, 0);
             }
         }
-
-        //If it just so happens to not see images or gets super confused;
-        if(false) {
-            if(isLoop == 0) {
-                encoderDrive(length,0, 1, 0);
-            }
-        }
     }
+
+
 
         public void encoderDrive(double lengthy, double x, double y, double rot) {//rot is short for rotation
             x = x * 1.1;
