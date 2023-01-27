@@ -53,7 +53,6 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "tensorFlow8417_new_test", group = "Vision")
 public class tensorFlow8417_new {
 
     /*
@@ -63,8 +62,8 @@ public class tensorFlow8417_new {
      * has been downloaded to the Robot Controller's SD FLASH memory, it must to be loaded using loadModelFromFile()
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
-    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-    // private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
+    // private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
+     private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
 
     OpMode opMode;
     HardwareMap hardwareMap;
@@ -77,9 +76,9 @@ public class tensorFlow8417_new {
     }
 
     private static final String[] LABELS = {
-            "1 Bolt",
-            "2 Bulb",
-            "3 Panel"
+            "Handsaw",
+            "Robot",
+            "Turtle"
     };
 
     /*
@@ -139,8 +138,8 @@ public class tensorFlow8417_new {
 
         // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
         // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
-        // tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
+        // tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
 
         if (tfod != null) {
             tfod.activate();
@@ -155,9 +154,9 @@ public class tensorFlow8417_new {
         }
     }
 
+    float confidence = -1;
+    String label = null;
     public String imageReturn(){
-        float confidence = -1;
-        String label = null;
         if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
@@ -187,6 +186,32 @@ public class tensorFlow8417_new {
                 return label;
             }
 
+        } else {
+            List<Recognition> nonUpdatedRecognitions = tfod.getRecognitions();
+            if (nonUpdatedRecognitions != null) {
+                telemetry.addData("# Objects Detected", nonUpdatedRecognitions.size());
+
+                // step through the list of recognitions and display image position/size information for each one
+                // Note: "Image number" refers to the randomized image orientation/number
+                for (Recognition recognition : nonUpdatedRecognitions) {
+                    double col = (recognition.getLeft() + recognition.getRight()) / 2;
+                    double row = (recognition.getTop() + recognition.getBottom()) / 2;
+                    double width = Math.abs(recognition.getRight() - recognition.getLeft());
+                    double height = Math.abs(recognition.getTop() - recognition.getBottom());
+
+                    if (recognition.getConfidence() > confidence) {
+                        confidence = recognition.getConfidence();
+                        label = recognition.getLabel();
+                    }
+
+                    telemetry.addData("", " ");
+                    telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                    telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
+                    telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
+                }
+                telemetry.update();
+                return label;
+            }
         }
         return null;
     }

@@ -59,7 +59,7 @@ public class autoSafetyNet extends OpMode {
 
 
 
-        if(Objects.equals(duck, "1 Bolt")) {
+        if(Objects.equals(duck, "Turtle")) {
             //Should be code for left parking spot.
             if(isLoop == 0){
                 encoderDrive(length, 0, 0, 0);
@@ -87,7 +87,7 @@ public class autoSafetyNet extends OpMode {
 
         //Should be code for front parking spot
 
-        if (Objects.equals(duck, "2 Bulb")) {
+        if (Objects.equals(duck, "Robot")) {
             if(isLoop == 0){
                 encoderDrive(length, 0,0,0);
             }
@@ -100,7 +100,7 @@ public class autoSafetyNet extends OpMode {
         }
 
         //Should be code for right parking spot
-        if(Objects.equals(duck, "3 Panel")) {
+        if(Objects.equals(duck, "Handsaw")) {
             if(isLoop == 0){
                 encoderDrive(length,0,0,0);
             }
@@ -123,6 +123,18 @@ public class autoSafetyNet extends OpMode {
                 encoderDrive(.2, 0, 0, 0);
             }
         }
+        if (Objects.equals(duck, null)) {
+            if(isLoop == 0){
+                encoderDrive(length, 0,0,0);
+            }
+            if(isLoop == 1) {
+                encoderDrive(length + .5, 1, 0, 0);
+            }
+            if(isLoop == 2){
+                encoderDrive(length,0,0,0);
+            }
+        }
+
     }
 
 
