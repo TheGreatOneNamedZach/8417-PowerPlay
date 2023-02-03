@@ -62,8 +62,8 @@ public class tensorFlow8417_new {
      * has been downloaded to the Robot Controller's SD FLASH memory, it must to be loaded using loadModelFromFile()
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
-    // private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-     private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
+     private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
+     //private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
 
     OpMode opMode;
     HardwareMap hardwareMap;
@@ -76,9 +76,13 @@ public class tensorFlow8417_new {
     }
 
     private static final String[] LABELS = {
-            "Handsaw",
+            /*"Handsaw",
             "Robot",
-            "Turtle"
+            "Turtle"*/
+
+            "Turtle",
+            "Robot",
+            "Handsaw"
     };
 
     /*
@@ -138,8 +142,8 @@ public class tensorFlow8417_new {
 
         // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
         // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-        // tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
-        tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        //tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
 
         if (tfod != null) {
             tfod.activate();

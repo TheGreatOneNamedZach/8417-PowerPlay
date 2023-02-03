@@ -59,6 +59,8 @@ public class autoSafetyNet extends OpMode {
 
 
 
+
+
         if(Objects.equals(duck, "Turtle")) {
             //Should be code for left parking spot.
             if(isLoop == 0){
