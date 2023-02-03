@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.vision;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -50,8 +51,9 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
+@Disabled
 @TeleOp(name = "Tensor Flow cam test", group = "test")
-public class camTest2 extends LinearOpMode {
+public class tFCamTest extends LinearOpMode {
 
     /*
      * Specify the source for the Tensor Flow Model.

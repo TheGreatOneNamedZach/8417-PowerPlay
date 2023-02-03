@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.vision.tensorFlow8417_new;
+import org.firstinspires.ftc.teamcode.vision.tF8417Main;
 
 import java.util.Objects;
 
@@ -21,7 +21,7 @@ public class autoSafetyNet extends OpMode {
     int isLoop = 0;
     double length = 1.0;
     double slow = .5;
-    org.firstinspires.ftc.teamcode.vision.tensorFlow8417_new detector = new tensorFlow8417_new();
+    org.firstinspires.ftc.teamcode.vision.tF8417Main detector = new tF8417Main();
     String duck = null; //Zach misspoke, so here it is now.
     String tempDuck = null;
 

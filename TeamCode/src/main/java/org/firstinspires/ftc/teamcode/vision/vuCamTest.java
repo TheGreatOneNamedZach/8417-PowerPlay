@@ -28,8 +28,8 @@
  */
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -65,9 +65,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below
  */
-
+@Disabled
 @TeleOp(name="vuforia cam test", group ="test")
-public class camTest extends LinearOpMode {
+public class vuCamTest extends LinearOpMode {
 
     public static final String TAG = "Vuforia VuMark Sample";
 

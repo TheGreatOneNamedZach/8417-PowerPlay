@@ -53,7 +53,7 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-public class tensorFlow8417_new {
+public class tF8417Main {
 
     /*
      * Specify the source for the Tensor Flow Model.
@@ -63,7 +63,7 @@ public class tensorFlow8417_new {
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
     // private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-     private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
+    private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
 
     OpMode opMode;
     HardwareMap hardwareMap;
