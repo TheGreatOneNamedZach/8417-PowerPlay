@@ -82,6 +82,9 @@ public class mechanicDrive extends OpMode {
             telemetry.addData("Pos", elevator.getCurrentPosition());
 
             if (gamepad2.left_stick_y == 0 && !isPressed) { // If the joystick is at rest AND the limit switch is not pressed...
+                elevator.setPower(0.025);
+
+                /*
                 if (!firstLoop) { // ...and the motor was NOT at rest in the last loop...
                     motor1Pos = elevator.getCurrentPosition(); // ...get the motor position.
                     firstLoop = true;
@@ -89,14 +92,17 @@ public class mechanicDrive extends OpMode {
                 This says the motor has been at rest before.
                 This is so the motor position is not constantly reset every loop iteration
                 while the motor is at rest.
-                 */
+                 */ /*
                 } else if (elevator.getCurrentPosition() < motor1Pos) { // ...and the motor WAS at rest in the last loop...
                     slideControl(motor1Pos);
-                }
-            } else { // If the joystick is NOT at rest...
+                } */
+            } else if(gamepad2.left_stick_y == 0 && isPressed) {
+                elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            } else { // If the joystick is NOT at rest..
                 elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 firstLoop = false;
                 elevator.setPower(motorPower);
+                telemetry.addData("Power", motorPower);
             }
         }
         if (gamepad2.dpad_down) {
@@ -242,32 +248,7 @@ public class mechanicDrive extends OpMode {
          * in the position that the robot now knows it needs to be in.
          */
     }
-        public void slideControl (int targetPos){
-            /*
-             * The linear slide knows where it is at all times.
-             * It knows this because it knows where it isn't.
-             * By subtracting where it is from where it isn't,
-             * or where it isn't from where it is (whichever is greater),
-             * it obtains a difference, or deviation.
-             * The PID system uses deviations to generate corrective commands
-             * to drive the linear side from a position where it is to a position where it isn't,
-             * and arriving at a position where it wasn't, it now is.
-             * Consequently, the position where it is, is now the position that it wasn't,
-             * and it follows that the position that it was, is now the position that it isn't.
-             * In the event that the position that it is in is not the position that it wasn't,
-             * the PID system has acquired a variation, the variation being the difference
-             * between where the linear slide is, and where it wasn't.
-             * If variation is considered to be a significant factor,
-             * it too may be corrected by the PID.
-             * However, the linear slide must also know where it was.
-             * The linear slide PID system works as follows.
-             * Because a variation has modified some of the information the linear slide has obtained,
-             * it is not sure just where it is.
-             * However, it is sure where it isn't, within reason, and it knows where it was.
-             * It now subtracts where it should be from where it wasn't,
-             * or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be,
-             * and where it was, it is able to obtain the deviation and its variation, which is called error.
-             */
+        /* public void slideControl (int targetPos){
             double currentTime = timer.milliseconds();
             double currentError = targetPos - elevator.getCurrentPosition();
 
@@ -282,5 +263,5 @@ public class mechanicDrive extends OpMode {
 
             lastTime = currentTime;
             lastError = currentError;
-        }
+        } */
     }
