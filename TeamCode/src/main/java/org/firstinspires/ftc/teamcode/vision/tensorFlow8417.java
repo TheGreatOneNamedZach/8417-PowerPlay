@@ -31,7 +31,7 @@ import java.util.List;
 @Disabled
 @Autonomous(name = "TensorFlow Test", group = "VisionTest")
 public class tensorFlow8417 extends LinearOpMode {
-    /* The models to be used for image detection and their labels
+    /* "modelArray" contains all information needed for image detection.
     The following is an example of what needs to be added:
 
 
@@ -39,11 +39,16 @@ public class tensorFlow8417 extends LinearOpMode {
     LABEL_NAME_1, LABEL_NAME_2, LABEL_NAME_3
 
 
-    The display name can be whatever you want. Make it something you can identify the model by
-    If the model is provided by FTC (built into the code), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "true"
-    If the model is custom made (your team imported it onto your robot), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "false"
-    "AMOUNT_OF_LABELS" should be the amount of labels you have for that SPECIFIC model.
-     */
+    The display name can be whatever you want. Make it something you can identify the model by.
+    Examples of "PATH_TO_MODEL" are in "modelArray". If you are using the default one, it should look like the first example.
+    If you are using a custom model, the "PATH_TO_MODEL" will look something like the 2nd and 3rd examples.
+    If the model is provided by FTC (built into the code), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "true".
+    If the model is custom made (your team imported it onto your robot), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "false".
+    "AMOUNT_OF_LABELS" should be the amount of labels you have for that SPECIFIC model. This is usually 3.
+    The label names are the names of the labels used by the model.
+    The label names are in a specific order and may take trial and error to get right order.
+    There is a comma at the end of each line WITH THE EXCEPTION OF THE FINAL LINE OF THE FINAL MODEL!
+    */
     private static final Object[] modelArray = {
             "Default TF Model", "PowerPlay.tflite", true, 3,
             "Bolt", "Light", "Panel",
