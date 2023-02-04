@@ -12,6 +12,9 @@
 # Java class files
 *.class
 
+# File(s) added by a human
+8417-PowerPlay/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/other/secrets.java
+
 # Generated files
 bin/
 gen/

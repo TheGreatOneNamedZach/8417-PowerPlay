@@ -29,19 +29,18 @@
 
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.other.secrets;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This 2022-2023 OpMode illustrates the basics of using the TensorFlow Object Detection API to
@@ -62,27 +61,26 @@ public class tF8417Main {
      * has been downloaded to the Robot Controller's SD FLASH memory, it must to be loaded using loadModelFromFile()
      * Here we assume it's an Asset.    Also see method initTfod() below .
      */
-     private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
-     //private static final String TFOD_MODEL_FILE  = "/sdcard/FIRST/tflitemodels/model_FTC8417.tflite";
+     private static final String DEFAULT_TFOD_MODEL_ASSET = "PowerPlay.tflite";
+     private static final String TFOD_MODEL_FILE_VERSION2  = "/sdcard/FIRST/tflitemodels/model_FTC8417_V2.tflite";
+     private static final String TFOD_MODEL_FILE_VERSION4  = "/sdcard/FIRST/tflitemodels/model_FTC8417_V4.tflite";
 
     OpMode opMode;
     HardwareMap hardwareMap;
-    Telemetry telemetry;
 
     public void init(OpMode opMode){
         this.opMode = opMode;
         this.hardwareMap = opMode.hardwareMap;
-        this.telemetry = opMode.telemetry;
     }
-
-    private static final String[] LABELS = {
-            /*"Handsaw",
+    private static final String[] DEFAULT_LABELS = {
+            "Bolt",
+            "Light",
+            "Panel"
+    };
+    private static final String[] CUSTOM_LABELS = {
+            "Handsaw",
             "Robot",
-            "Turtle"*/
-
-            "Turtle",
-            "Robot",
-            "Handsaw"
+            "Turtle"
     };
 
     /*
@@ -97,24 +95,13 @@ public class tF8417Main {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY =
-            "AY2G5L3/////AAABmY6raHnlIEr8l5IMpVUjjaA65U6r+1PTCbEOcH8PqRftg8NMR+GKEB+9yVm+iK0ROgKF/lXJqg0O4gY6DXG9NJhN+hld1n5/xfqDh7u1hCXwPB6qUGE/SEcW7BhT/jxQyd4cuzu0IP//OhHH+PnapNHipwrHvS9Ac0yobhd91aGGbOJlJa6YiMWRJWm+IMPk7RR5jKE/IBp3AUMEnrPOMSQLst0ZJVHMf6a3dHovIf5tX7w4efdlfhqUtvHppQ/R2K42sVuSN1BA9SMcEbpl1amqRwQ1F6i2iR7KBf6QooPnsaxFHa1od5yTVGnu0kSw43/zaaywsESroPE8DIXNmItX47RTEf8+WJhooRz9/mCZ";
+    static org.firstinspires.ftc.teamcode.other.secrets secrets = new secrets();
+    private static final String VUFORIA_KEY = secrets.REPLACE_ME_WITH_YOUR_OWN_VUFORIA_KEY;
 
-    /**
-     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
-     * localization engine.
-     */
     private VuforiaLocalizer vuforia;
 
-    /**
-     * {@link #tfod} is the variable we will use to store our instance of the TensorFlow Object
-     * Detection engine.
-     */
-    private TFObjectDetector tfod;
+    public TFObjectDetector tfod;
 
-    /**
-     * Initialize the Vuforia localization engine.
-     */
     public void initVuforia() {
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -128,22 +115,24 @@ public class tF8417Main {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
 
-    /**
-     * Initialize the TensorFlow Object Detection engine.
-     */
-    public void initTfod() {
+    public void initTfod(String teamColor) {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.75f;
+        tfodParameters.minResultConfidence = 0.70f;
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.inputSize = 300;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
 
         // Use loadModelFromAsset() if the TF Model is built in as an asset by Android Studio
         // Use loadModelFromFile() if you have downloaded a custom team model to the Robot Controller's FLASH.
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
-        //tfod.loadModelFromFile(TFOD_MODEL_FILE, LABELS);
+        if(Objects.equals(teamColor, "Default")) {
+            tfod.loadModelFromAsset(DEFAULT_TFOD_MODEL_ASSET, DEFAULT_LABELS);
+        } else if (Objects.equals(teamColor, "Blue")) {
+            tfod.loadModelFromFile(TFOD_MODEL_FILE_VERSION2, CUSTOM_LABELS);
+        } else {
+            tfod.loadModelFromFile(TFOD_MODEL_FILE_VERSION4, CUSTOM_LABELS);
+        }
 
         if (tfod != null) {
             tfod.activate();
@@ -166,54 +155,12 @@ public class tF8417Main {
             // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
-                telemetry.addData("# Objects Detected", updatedRecognitions.size());
-
-                // step through the list of recognitions and display image position/size information for each one
-                // Note: "Image number" refers to the randomized image orientation/number
                 for (Recognition recognition : updatedRecognitions) {
-                    double col = (recognition.getLeft() + recognition.getRight()) / 2;
-                    double row = (recognition.getTop() + recognition.getBottom()) / 2;
-                    double width = Math.abs(recognition.getRight() - recognition.getLeft());
-                    double height = Math.abs(recognition.getTop() - recognition.getBottom());
-
                     if (recognition.getConfidence() > confidence) {
                         confidence = recognition.getConfidence();
                         label = recognition.getLabel();
                     }
-
-                    telemetry.addData("", " ");
-                    telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                    telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
-                    telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
                 }
-                telemetry.update();
-                return label;
-            }
-
-        } else {
-            List<Recognition> nonUpdatedRecognitions = tfod.getRecognitions();
-            if (nonUpdatedRecognitions != null) {
-                telemetry.addData("# Objects Detected", nonUpdatedRecognitions.size());
-
-                // step through the list of recognitions and display image position/size information for each one
-                // Note: "Image number" refers to the randomized image orientation/number
-                for (Recognition recognition : nonUpdatedRecognitions) {
-                    double col = (recognition.getLeft() + recognition.getRight()) / 2;
-                    double row = (recognition.getTop() + recognition.getBottom()) / 2;
-                    double width = Math.abs(recognition.getRight() - recognition.getLeft());
-                    double height = Math.abs(recognition.getTop() - recognition.getBottom());
-
-                    if (recognition.getConfidence() > confidence) {
-                        confidence = recognition.getConfidence();
-                        label = recognition.getLabel();
-                    }
-
-                    telemetry.addData("", " ");
-                    telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                    telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
-                    telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
-                }
-                telemetry.update();
                 return label;
             }
         }
