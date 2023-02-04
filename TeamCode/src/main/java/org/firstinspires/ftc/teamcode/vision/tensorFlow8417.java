@@ -20,7 +20,7 @@ import java.util.List;
  * You can use this OpMode to test your image detection.
  * To get started, you have to do six things:
  * 1.) Add your image models into "modelArray" following the instructions above "modelArray"
- * 2.) Remove the "@Disabled" line. It is the first line of actual code below these comments
+ * 2.) Remove the "@Disabled" line. It is the first line of actual code below these comments. If it is commented out, do not worry about it.
  * 3.) Remove the line right above the "VUFORIA_KEY" line (the line to remove ends with "new secrets();")
  * 4.) "VUFORIA_KEY" needs a free Vuforia key from https://developer.vuforia.com/vui/develop/licenses
  * 5.) "cameraName" needs to be the name of the camera you are using on your robot. By default this is "Webcam 1"
@@ -98,7 +98,7 @@ That's it!
 Guide Last Updated: Feb 4, 2023
  */
 
-
+//@Disabled
 @Autonomous(name = "TensorFlow Test", group = "VisionTest")
 public class tensorFlow8417 extends LinearOpMode {
     /* "modelArray" contains all information needed for image detection.
