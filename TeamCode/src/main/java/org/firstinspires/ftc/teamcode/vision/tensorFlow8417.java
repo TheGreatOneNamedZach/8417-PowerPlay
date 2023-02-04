@@ -18,12 +18,15 @@ import java.util.List;
  * This Linear OpMode is an Autonomous.
  * It uses TensorFlow and Vuforia to detect the signal cone in the FTC PowerPlay season.
  * You can use this OpMode to test your image detection.
- * To get started, you have to do five things:
+ * To get started, you have to do six things:
  * 1.) Add your image models into "modelArray" following the instructions above "modelArray"
  * 2.) Remove the "@Disabled" line. It is the first line of actual code below these comments
  * 3.) Remove the line right above the "VUFORIA_KEY" line (the line to remove ends with "new secrets();")
  * 4.) "VUFORIA_KEY" needs a free Vuforia key from https://developer.vuforia.com/vui/develop/licenses
  * 5.) "cameraName" needs to be the name of the camera you are using on your robot. By default this is "Webcam 1"
+ * 6.) After you are done using the example models in the "modelArray" to make sure you correctly
+ * imported your model into this autonomous, delete the "Custom TF Model (V2)" and "Custom TF Model (V4)" examples
+ * as they may crash the code.
  *
  * That's it! You should not need to modify any other lines of code.
  * In the event that you do need to modify something, most lines of code explain what they do.
