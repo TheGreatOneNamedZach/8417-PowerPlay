@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.vision;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -26,32 +29,33 @@ import org.firstinspires.ftc.teamcode.other.secrets;
 @Autonomous(name = "TensorFlow Test", group = "VisionTest")
 public class tensorFlow8417 extends LinearOpMode {
     /* The models to be used for image detection and their labels
-    It is assumed that every model has three labels (this is modifiable)
 
 
-    DISPLAY_NAME, PATH_TO_MODEL, ASSET_OR_FILE,
+    DISPLAY_NAME, PATH_TO_MODEL, TRUE_IF_ASSET_FALSE_IF_FILE, AMOUNT_OF_LABELS,
     LABEL_NAME_1, LABEL_NAME_2, LABEL_NAME_3
 
 
     The display name can be whatever you want
-    If the model is provided (built into the code), "ASSET_OR_FILE" should be "Asset"
-    If the model is custom made (your team imported it onto your robot), "ASSET_OR_FILE" should be "File"
+    If the model is provided by FTC (built into the code), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "true"
+    If the model is custom made (your team imported it onto your robot), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "false"
+    "AMOUNT_OF_LABELS" should be the amount of labels you have for that SPECIFIC model.
      */
-    private static final String[] modelArray = {
-            "Default TF Model", "PowerPlay.tflite", "Asset",
+    private static final Object[] modelArray = {
+            "Default TF Model", "PowerPlay.tflite", true, 3,
             "Bolt", "Light", "Panel",
 
-            "Custom TF Model (V2)", "/sdcard/FIRST/tflitemodels/model_FTC8417_V2.tflite", "File",
+            "Custom TF Model (V2)", "/sdcard/FIRST/tflitemodels/model_FTC8417_V2.tflite", false, 3,
             "Handsaw", "Robot", "Turtle",
 
-            "Custom TF Model (V4)", "/sdcard/FIRST/tflitemodels/model_FTC8417_V4.tflite", "File",
+            "Custom TF Model (V4)", "/sdcard/FIRST/tflitemodels/model_FTC8417_V4.tflite", false, 3,
             "Handsaw", "Robot", "Turtle"
     };
 
-    private int currentModelIndex = 0;
+    static org.firstinspires.ftc.teamcode.other.secrets secrets = new secrets(); // If you are not team 8417, delete this line
+    private static final String VUFORIA_KEY = secrets.REPLACE_ME_WITH_YOUR_OWN_VUFORIA_KEY; // This string should be your Vuforia key
 
-    static org.firstinspires.ftc.teamcode.other.secrets secrets = new secrets();
-    private static final String VUFORIA_KEY = secrets.REPLACE_ME_WITH_YOUR_OWN_VUFORIA_KEY;
+    private int currentModelIndex = 0;
+    StringBuilder labels = new StringBuilder(); // Makes a new StringBuilder
 
     private VuforiaLocalizer vuforia;
 
@@ -65,16 +69,22 @@ public class tensorFlow8417 extends LinearOpMode {
             // Allows the driver to select the model to use
 
             // Gives the driver instructions
-            telemetry.addData("Model Selected", modelArray[currentModelIndex * 6] + "\nUse the left and right D-Pad buttons to scroll through the models.\nConfirm your selection by pressing Y.");
+            telemetry.addData("Model Selected", modelArray[currentModelIndex] + "\nUse the B button on gamepad 1 to scroll through the models.\nConfirm your selection by pressing Y on gamepad 1.");
 
             // Displays on the phone screen the labels of the currently selected model
-            telemetry.addData("Labels", modelArray[(currentModelIndex * 6) + 3] + ", " + modelArray[(currentModelIndex * 6) + 4] + ", " + modelArray[(currentModelIndex * 6) + 5]);
+            for(int i = 1; i <= (int)modelArray[currentModelIndex + 3]; i++) { // Adds each label for the current model to each other in a string
+                labels.append(modelArray[currentModelIndex + 3 + i]);
+                if(i < (int)modelArray[currentModelIndex + 3]) { // Adds spacing
+                    labels.append(", ");
+                }
+            }
 
-            if(gamepad1.dpad_left && currentModelIndex != 0){ // Scrolls left through the models but stops at the first model
-                currentModelIndex -= 6;
-                sleep(200);
-            } else if (gamepad1.dpad_right && (currentModelIndex + 5) != modelArray.length) { // Scrolls right through the models but stops at the last model
-                currentModelIndex += 6;
+            if(gamepad1.b) { // Cycles through the models from start to finish. Then, loops back to the first model
+                currentModelIndex = currentModelIndex + 4 + (int)modelArray[currentModelIndex + 3];
+                if(currentModelIndex >= (int)modelArray.length) {
+                    currentModelIndex -= (int)modelArray.length;
+                }
+                labels = null;
                 sleep(200);
             }
         }
@@ -147,11 +157,17 @@ public class tensorFlow8417 extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia); // Obtains the already running Vuforia instance and uses it
 
         // Gets the labels for the specific model
-        String[] tempLabels = {modelArray[(currentModelIndex * 6) + 3], modelArray[(currentModelIndex * 6) + 4], modelArray[(currentModelIndex * 6) + 5]};
-        if(modelArray[(currentModelIndex * 6) + 2].equalsIgnoreCase("Asset")) { // If the selected model is an asset...
-            tfod.loadModelFromAsset(modelArray[(currentModelIndex * 6) + 1], tempLabels); // Loads the model as an asset
+        ArrayList<String> labelsArrayList = new ArrayList<>(); // Creates a new String array list
+        for(int i = 1; i <= (int)modelArray[currentModelIndex + 3]; i++) { // Adds each label to the String array list
+            labelsArrayList.add(String.valueOf(modelArray[currentModelIndex + 3 + i]));
+        }
+        String[] labelsArray = new String[labelsArrayList.size()]; // Creates a new String array
+        labelsArrayList.toArray(labelsArray); // The String array now has the labels
+
+        if((boolean)modelArray[currentModelIndex + 2]) { // If the selected model is an asset...
+            tfod.loadModelFromAsset(String.valueOf(modelArray[currentModelIndex + 1]), labelsArray); // Loads the model as an asset
         } else { // If the selected model is NOT an asset...
-            tfod.loadModelFromFile(modelArray[(currentModelIndex * 6) + 1], tempLabels); // Loads the model as a file
+            tfod.loadModelFromFile(String.valueOf(modelArray[currentModelIndex + 1]), labelsArray); // Loads the model as a file
         }
     }
 }
