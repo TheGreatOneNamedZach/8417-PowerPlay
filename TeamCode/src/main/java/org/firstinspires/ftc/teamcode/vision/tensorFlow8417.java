@@ -4,38 +4,42 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.other.secrets;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This Linear OpMode is an Autonomous.
- * This autonomous is to test our image detection.
- * This is the same as tF8417Main.java but:
- * 1.) It is linear unlike tF8417Main.java
- * 2.) It is all in one file
+ * It uses TensorFlow and Vuforia to detect the signal cone in the FTC PowerPlay season.
+ * You can use this OpMode to test your image detection.
+ * To get started, you have to do four things:
+ * 1.) Add your image models into "modelArray" following the instructions above "modelArray"
+ * 2.) "VUFORIA_KEY" needs a free Vuforia key from https://developer.vuforia.com/vui/develop/licenses
+ * 3.) "cameraName" needs to be the name of the camera you are using on your robot. By default this is "Webcam 1"
+ * 4.) Remove the "@Disabled" line below this comment
  *
- * THIS CAN BE USED AS A BASE TEMPLATE FOR ANY TENSORFLOW AUTONOMOUS
+ * That's it! You should not need to modify any other lines of code.
+ * In the event that you do need to modify something, most lines of code explain what they do.
  */
 
 @Disabled
 @Autonomous(name = "TensorFlow Test", group = "VisionTest")
 public class tensorFlow8417 extends LinearOpMode {
     /* The models to be used for image detection and their labels
+    The following is an example of what needs to be added:
 
 
     DISPLAY_NAME, PATH_TO_MODEL, TRUE_IF_ASSET_FALSE_IF_FILE, AMOUNT_OF_LABELS,
     LABEL_NAME_1, LABEL_NAME_2, LABEL_NAME_3
 
 
-    The display name can be whatever you want
+    The display name can be whatever you want. Make it something you can identify the model by
     If the model is provided by FTC (built into the code), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "true"
     If the model is custom made (your team imported it onto your robot), "TRUE_IF_ASSET_FALSE_IF_FILE" should be "false"
     "AMOUNT_OF_LABELS" should be the amount of labels you have for that SPECIFIC model.
@@ -53,6 +57,7 @@ public class tensorFlow8417 extends LinearOpMode {
 
     static org.firstinspires.ftc.teamcode.other.secrets secrets = new secrets(); // If you are not team 8417, delete this line
     private static final String VUFORIA_KEY = secrets.REPLACE_ME_WITH_YOUR_OWN_VUFORIA_KEY; // This string should be your Vuforia key
+    private static final String cameraName = "Webcam 1";
 
     private int currentModelIndex = 0;
     StringBuilder labels = new StringBuilder(); // Makes a new StringBuilder
@@ -142,7 +147,7 @@ public class tensorFlow8417 extends LinearOpMode {
     private void initVuforia() { // Initialises Vuforia
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(); // Creates a new list of parameters to use for Vuforia
         parameters.vuforiaLicenseKey = VUFORIA_KEY; // Obtains a valid Vuforia key that is stored elsewhere in the code
-        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1"); // Tells Vuforia which camera to use
+        parameters.cameraName = hardwareMap.get(WebcamName.class, cameraName); // Tells Vuforia which camera to use
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters); // Starts Vuforia
     }
