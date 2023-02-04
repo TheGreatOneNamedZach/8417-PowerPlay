@@ -13,7 +13,7 @@
 *.class
 
 # File(s) added by a human
-**/secrets.java
+secrets.java
 
 # Generated files
 bin/
