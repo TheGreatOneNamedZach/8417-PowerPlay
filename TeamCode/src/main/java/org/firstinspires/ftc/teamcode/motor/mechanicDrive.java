@@ -26,7 +26,6 @@ public class mechanicDrive extends OpMode {
     public ElapsedTime clawTimer = new ElapsedTime();
     public ElapsedTime swivelTimer = new ElapsedTime();
 
-    mb1043sensor distanceSensor;
     DcMotor elevator = null;
     Servo claw = null;
     Servo swivel = null;
@@ -35,6 +34,8 @@ public class mechanicDrive extends OpMode {
     int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
     boolean isPressed = false;
+
+    Servo distanceServo;
 
     @Override
     public void init() {
@@ -57,12 +58,18 @@ public class mechanicDrive extends OpMode {
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        distanceSensor = hardwareMap.get(mb1043sensor.class, "Distance Sensor");
+        distanceServo = hardwareMap.get(Servo.class, "Distance Servo");
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Distance", distanceSensor.getDistance());
+
+        if (gamepad1.a) {
+            distanceServo.setPosition(distanceServo.getPosition() - 0.01);
+        } else if (gamepad1.b) {
+            distanceServo.setPosition(distanceServo.getPosition() + 0.01);
+        }
+        telemetry.addData("Distance Servo", distanceServo.getPosition());
 
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {

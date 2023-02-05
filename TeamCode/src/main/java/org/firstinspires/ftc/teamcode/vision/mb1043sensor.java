@@ -13,9 +13,13 @@ import com.qualcomm.robotcore.util.TypeConversion;
 @DeviceProperties(name = "MaxSonar I2CXL v2", description = "MaxSonar I2CXL Sensor from MaxBotix", xmlTag = "MaxSonarI2CXLv2")
 public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
 {
-    int lastDistance = -1;
-    long lastPingTime;
-    boolean waitingForNextPing = true;
+    private int lastDistance = -1;
+    private long lastPingTime;
+    private boolean waitingForNextPing = true;
+    /** Range of the sensor */
+    public final double rangeInDegrees = 90.00;
+    /** Minimum update delay of sensor (how quickly it spit out new data) */
+    public final double minDelayInMilliseconds = 100;
 
     @Override
     public Manufacturer getManufacturer(){
@@ -32,6 +36,7 @@ public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
         return "MaxSonarI2CXLv2";
     }
 
+    /** Constructs the MB1043 sensor as an I2C device. */
     public mb1043sensor(I2cDeviceSynch deviceClient, boolean deviceClientIsOwned){
         super(deviceClient, deviceClientIsOwned);
         this.deviceClient.setI2cAddress(I2cAddr.create8bit(0xE0));
@@ -43,6 +48,11 @@ public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
         deviceClient.write8(0, 0x51, I2cWaitControl.WRITTEN);
     }
 
+    /** Returns the distance to the closest object.
+     * There is a 0.1 second delay between updates.
+     * Calling this method quicker than the delay will return the last distance found.
+     * @return Centimeters as int
+     */
     public int getDistance(){
         long curTime = System.currentTimeMillis();
         if(((curTime - lastPingTime) > 100) && !waitingForNextPing){
@@ -54,5 +64,9 @@ public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
             waitingForNextPing = false;
         }
         return lastDistance;
+    }
+
+    public long getLastPingTime() {
+        return lastPingTime; // This is a method because if the variable was public it is changeable outside this class.
     }
 }
