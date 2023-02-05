@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.vision.mb1043sensor;
+
 import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
@@ -24,6 +26,7 @@ public class mechanicDrive extends OpMode {
     public ElapsedTime clawTimer = new ElapsedTime();
     public ElapsedTime swivelTimer = new ElapsedTime();
 
+    mb1043sensor distanceSensor;
     DcMotor elevator = null;
     Servo claw = null;
     Servo swivel = null;
@@ -32,15 +35,6 @@ public class mechanicDrive extends OpMode {
     int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
     boolean isPressed = false;
-
-    double p = +.15;
-    double i = 0; // Must never be null
-    double d = .15;
-    double k_p = 0.2; // Rate of power change based on error
-    double k_i = 0; // Jumpstarts the slide if it stalls
-    double k_d = 3;
-    double lastTime = -1;
-    double lastError = -1;
 
     @Override
     public void init() {
@@ -63,10 +57,13 @@ public class mechanicDrive extends OpMode {
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        distanceSensor = hardwareMap.get(mb1043sensor.class, "Distance Sensor");
     }
 
     @Override
     public void loop() {
+        telemetry.addData("Distance", distanceSensor.getDistance());
+
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {
             slowSpeed = 1.00;
