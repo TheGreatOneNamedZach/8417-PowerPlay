@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.vision.mb1043sensor;
+import org.firstinspires.ftc.teamcode.motor.distanceSensor;
 
 import java.text.DecimalFormat;
 
@@ -31,11 +31,10 @@ public class mechanicDrive extends OpMode {
     Servo swivel = null;
     DigitalChannel digitalTouch;
     double motorPower; // Declares a double for telemetry and motor use
-    int motor1Pos = 0; // This saves the motor position when it is first at rest
     boolean firstLoop = false;
     boolean isPressed = false;
 
-    Servo distanceServo;
+    distanceSensor distanceSensor = new distanceSensor();
 
     @Override
     public void init() {
@@ -58,18 +57,18 @@ public class mechanicDrive extends OpMode {
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        distanceServo = hardwareMap.get(Servo.class, "Distance Servo");
+        distanceSensor.init(this);
     }
 
     @Override
     public void loop() {
 
         if (gamepad1.a) {
-            distanceServo.setPosition(distanceServo.getPosition() - 0.01);
+            telemetry.addData("Distance Servo Scan", distanceSensor.scan());
         } else if (gamepad1.b) {
-            distanceServo.setPosition(distanceServo.getPosition() + 0.01);
+            distanceSensor.startScanning(1);
         }
-        telemetry.addData("Distance Servo", distanceServo.getPosition());
+        telemetry.addData("Distance Servo", distanceSensor.getDistanceWithoutScan());
 
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {
