@@ -55,10 +55,10 @@ public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
      */
     public int getDistance(){
         long curTime = System.currentTimeMillis();
-        if(((curTime - lastPingTime) > 100) && !waitingForNextPing){
+        if(((curTime - lastPingTime) > 99) && !waitingForNextPing){
             lastDistance = TypeConversion.byteArrayToShort(deviceClient.read(0x01, 2));
             waitingForNextPing = true;
-        } if((System.currentTimeMillis() - lastPingTime) > 100){
+        } if((System.currentTimeMillis() - lastPingTime) > 99){
             ping();
             lastPingTime = System.currentTimeMillis();
             waitingForNextPing = false;

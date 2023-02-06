@@ -35,6 +35,7 @@ public class mechanicDrive extends OpMode {
     boolean isPressed = false;
 
     distanceSensor distanceSensor = new distanceSensor();
+    double[] distance;
 
     @Override
     public void init() {
@@ -53,7 +54,7 @@ public class mechanicDrive extends OpMode {
         elevator = hardwareMap.get(DcMotor.class, "Elevator");
         claw = hardwareMap.get(Servo.class, "Claw");
         swivel = hardwareMap.get(Servo.class, "Swivel");
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "sensor_digital");
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "Touch Sensor");
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
         elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -62,13 +63,17 @@ public class mechanicDrive extends OpMode {
 
     @Override
     public void loop() {
-
-        if (gamepad1.a) {
-            telemetry.addData("Distance Servo Scan", distanceSensor.scan());
+        if(gamepad1.a) {
+            distanceSensor.startScanning(5);
+        } else if (gamepad1.y) {
+            distanceSensor.freeze();
         } else if (gamepad1.b) {
+            distanceSensor.sweepOnce(5);
+        } else if (gamepad1.x) {
             distanceSensor.startScanning(1);
         }
-        telemetry.addData("Distance Servo", distanceSensor.getDistanceWithoutScan());
+        distance = distanceSensor.scan();
+        telemetry.addData("Distance Sensor", distance[0] + ", " + distance[1]);
 
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {
