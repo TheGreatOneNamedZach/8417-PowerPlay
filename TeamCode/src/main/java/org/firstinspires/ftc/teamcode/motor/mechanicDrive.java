@@ -73,7 +73,7 @@ public class mechanicDrive extends OpMode {
             distanceSensor.startScanning(1);
         }
         distance = distanceSensor.scan();
-        telemetry.addData("Distance Sensor", distance[0] + ", " + distance[1]);
+        telemetry.addData("Distance Sensor", distance[0] + ", Rotation: " + distance[1] + " degrees");
 
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {
