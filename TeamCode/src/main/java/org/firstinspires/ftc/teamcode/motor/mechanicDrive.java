@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.motor.distanceSensor;
-
 import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
@@ -68,12 +66,25 @@ public class mechanicDrive extends OpMode {
         } else if (gamepad1.y) {
             distanceSensor.freeze();
         } else if (gamepad1.b) {
-            distanceSensor.sweepOnce(5);
+            distance = distanceSensor.scan();
         } else if (gamepad1.x) {
             distanceSensor.startScanning(1);
         }
-        distance = distanceSensor.scan();
-        telemetry.addData("Distance Sensor", distance[0] + ", Rotation: " + distance[1] + " degrees");
+
+        try {
+            telemetry.addData("Distance Sensor", distance[0] + "\nRotation: " + distance[1] + " degrees\n" + "X: " + distance[2] + "\nY: " + distance[3]);
+            telemetry.addData("angle", distance[4]);
+            telemetry.addData("trueangle", distance[5]);
+            telemetry.addData("sqrt", distance[6]);
+            telemetry.addData("d2", distance[7]);
+            if (distance[0] < 100) {
+                claw.setPosition(.42);
+            } else {
+                claw.setPosition(.64);
+            }
+        } catch (Exception e) {
+            telemetry.addData("Distance", "null. This would have caused a NullPointer. Watch what you are doing!");
+        }
 
         setPowerMechanum(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
         if (gamepad1.right_bumper) {

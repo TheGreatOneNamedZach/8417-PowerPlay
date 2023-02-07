@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.vision.mb1043sensor;
 
 import java.util.Objects;
@@ -13,12 +15,12 @@ import java.util.Objects;
 public class distanceSensor {
     private mb1043sensor mb1043sensor;
     private Servo distanceServo;
-    private final double servoSpinAreaInDegrees = 180.00;
+    private final double servoSpinAreaInDegrees = 135.00;
     private final double servoMaxRotation = 300.00;
     private static String actionInProgress = "none";
-    private static int degreesToTravelPerScan = 0;
+    private static double degreesToTravelPerScan = 0.00;
     private static long lastSysTime = -1;
-    private static double roundingNumber = 10000.0;
+    private static final double roundingNumber = 10000.0; // The amount of zeros between the "1" and "." are the number decimal places
 
     // This is the upper boundary.
     // This only matters if you have custom limits set.
@@ -37,7 +39,7 @@ public class distanceSensor {
      * @param degreesToTravelPerScan Indicates how many degrees should be traveled after each scan. This should be negative to scan in the reverse direction.
      * @apiNote A continuous scan will be stopped if another type of scan is requested. However, that request will be carried out.
      */
-    public void startScanning(int degreesToTravelPerScan) {
+    public void startScanning(double degreesToTravelPerScan) {
         actionInProgress = "contScan"; // Indicates to scan() that the user wants to start a continuous scan
         distanceSensor.degreesToTravelPerScan = degreesToTravelPerScan;
     }
@@ -52,7 +54,7 @@ public class distanceSensor {
     /** Scans its area then scans back to its starting position.
      * @param degreesToTravelPerScan Indicates how many degrees should be traveled after each scan. This should be negative to scan in the reverse direction.
      */
-    public void sweepOnce(int degreesToTravelPerScan) {
+    public void sweepOnce(double degreesToTravelPerScan) {
         actionInProgress = "sweepOnce"; // Indicates to scan() that the user wants to start a single sweep
         distanceSensor.degreesToTravelPerScan = degreesToTravelPerScan;
     }
@@ -61,7 +63,7 @@ public class distanceSensor {
      * @param degreesToTravelPerScan Indicates how many degrees should be traveled after each scan.
      * @apiNote This will never travel towards the minimum boundary.
      */
-    public void scanToMax(int degreesToTravelPerScan) {
+    public void scanToMax(double degreesToTravelPerScan) {
         actionInProgress = "scanOnce"; // Indicates to scan() that the user wants to scan to the higher boundary
         distanceSensor.degreesToTravelPerScan = Math.abs(degreesToTravelPerScan);
     }
@@ -70,7 +72,7 @@ public class distanceSensor {
      * @param degreesToTravelPerScan Indicates how many degrees should be traveled after each scan.
      * @apiNote This will never travel towards the maximum boundary
      */
-    public void scanToMin(int degreesToTravelPerScan) {
+    public void scanToMin(double degreesToTravelPerScan) {
         actionInProgress = "scanOnce"; // Indicated to scan() that the user wants to scan to the lower boundary
         distanceSensor.degreesToTravelPerScan = Math.abs(degreesToTravelPerScan) * -1;
     }
@@ -85,13 +87,27 @@ public class distanceSensor {
 
     /** Returns the distance without scanning. (This is scan() but does not rotate)
      * @apiNote Want to temperately stop rotating the sensor? Use freeze(). This is the same as freeze() if this method is called only when scan() is not.
-     * @return Returns as a double[]. Returns the distance and current rotation (in degrees).
+     * @return  Returns as a double[]. Returns the distance, the degree of its highest clockwise boundary, the x, and the y.
      */
     public double[] getDistanceWithoutScan() {
-        return new double[] {mb1043sensor.getDistance(), (Math.round(distanceServo.getPosition() * roundingNumber) / roundingNumber)};
+        int distance = mb1043sensor.getDistance();
+        double angle = Math.toRadians((Math.round(servoPositionToDegrees(distanceServo.getPosition()) - 90.00)));
+        double trueAngle = (Math.asin( Math.sqrt((Math.pow(distance, 2)) - 900.0) / distance) ) - angle;
+        double x = distance * Math.cos(trueAngle);
+        double y = distance * Math.sin(trueAngle);
+        return new double[] {distance, ((Math.toDegrees(angle) * roundingNumber) / roundingNumber), x, y};
     }
 
-    private void rotate(int degreesToTravelPerScan) {
+    /** Turns the distance sensor to the specified degree. It will not scan() to this position just rotate.
+     * @apiNote The distance sensor WILL NOT START READING FROM THIS DEGREE!
+     * @param degree Where you want the distance sensor to face. (assuming it faces 0 degrees when turned to 0 degrees)
+     */
+    public void distanceSensorTurnToDegree(double degree) {
+        if(distanceServo.getPosition() == degreesToServoPosition(degree)) {actionInProgress = "none";return;} // Ends early if already at the position
+        distanceServo.setPosition(degreesToServoPosition(degree)); // Goes to the position
+    }
+
+    private void rotate(double degreesToTravelPerScan) {
         double currentPosition = distanceServo.getPosition();
         double nextPosition = currentPosition + degreesToServoPosition(degreesToTravelPerScan);
         distanceServo.setPosition(nextPosition);
@@ -107,35 +123,29 @@ public class distanceSensor {
         return true;
     }
 
-    private double degreesToServoPosition(int degrees) {
+    private double degreesToServoPosition(double degrees) {
         // This assumes 0 degrees is the position 0.00
         try {
             // There is actually a lot of things that could go wrong
             // because of this, if something DOES go wrong, you will easily know it happened here.
-            return (double)degrees / servoSpinAreaInDegrees;
+            return ((((double)degrees) / servoMaxRotation) * roundingNumber) / roundingNumber;
         } catch (Exception e) {
             throw new RuntimeException("'degreesToServoPosition()' in the '" + getClass().getSimpleName() + "' class threw the following error:\n" + e);
         }
     }
 
     private double servoPositionToDegrees(double servoPosition) {
-        return servoPosition * servoSpinAreaInDegrees;
-    }
-
-    public String getActionInProgress() {
-        return actionInProgress;
+        return servoPosition * servoMaxRotation;
     }
 
     /** Scans the area following the directions previously specified by the user.
      * If no directions were given previously, it will just scan in place.
      * If no position has been previously set, it will start assume it's position is 0.
      * @apiNote scan() was made to be called continuously in a loop() or while() statement.
-     * @return Returns as a double[]. Returns the distance and current rotation (in degrees).
+     * @return Returns as a double[]. Returns the distance and the degree of its highest clockwise boundary.
      */
     public double[] scan() {
-        double distance = mb1043sensor.getDistance();
-        double currentRotation = Math.round(servoPositionToDegrees(distanceServo.getPosition()) * roundingNumber) / roundingNumber;
-        double[] disAndRot = {distance, currentRotation};
+        double[] disAndRot = getDistanceWithoutScan();
         if(delayNotFinished() || Objects.equals(actionInProgress, "none")) {
             return disAndRot;
         }
@@ -152,13 +162,13 @@ public class distanceSensor {
                 In addition, if it is currently executing a "scanOnce", it will stop
            Else, it will reverse direction */
         if(
-                (((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) < 0) // If rotating would exit the lower boundary...
+                (((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) < 0.00) // If rotating would exit the lower boundary...
                         && //...and...
-                        (degreesToTravelPerScan <= 0)) //...it is traveling towards the lower boundary
+                        (degreesToTravelPerScan <= 0.00)) //...it is traveling towards the lower boundary
                 || // OR
                 (((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) > maxBoundaryInTicks) // If rotating would exit the higher boundary...
                         && //...and...
-                        (degreesToTravelPerScan >= 0)) //...it is traveling towards the higher boundary
+                        (degreesToTravelPerScan >= 0.00)) //...it is traveling towards the higher boundary
         ) { // TL;DR, when it hits reaches a boundary, the following happens:
 
 
@@ -197,7 +207,7 @@ public class distanceSensor {
                             (
                                     ((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) > maxBoundaryInTicks) // A.) the distance sensor is at the higher boundary
                                     || //OR
-                                    ((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) < 0) // B.) The distance sensor is at the lower boundary
+                                    ((distanceServo.getPosition() + degreesToServoPosition(degreesToTravelPerScan)) < 0.00) // B.) The distance sensor is at the lower boundary
                             )
             ) {// then stop rotating and just scan in place
                 actionInProgress = "none";
@@ -205,18 +215,14 @@ public class distanceSensor {
             }
 
             // If none of those if statements happen it must be continuous rotation.
-            degreesToTravelPerScan = degreesToTravelPerScan * -1; // So reverse directions to go back to the opposite boundary
+            degreesToTravelPerScan = degreesToTravelPerScan * -1.00; // So reverse directions to go back to the opposite boundary
             rotate(degreesToTravelPerScan);
-            distance = mb1043sensor.getDistance();
-            currentRotation = Math.round(servoPositionToDegrees(distanceServo.getPosition()) * roundingNumber) / roundingNumber;
-            return new double[]{distance, currentRotation};
+            return getDistanceWithoutScan(); // After rotating, it returns the new distance
 
         }
         
         // If the sensor is not at a boundary...
         rotate(degreesToTravelPerScan);
-        distance = mb1043sensor.getDistance();
-        currentRotation = Math.round(servoPositionToDegrees(distanceServo.getPosition()) * roundingNumber) / roundingNumber;
-        return new double[]{distance, currentRotation};
+        return getDistanceWithoutScan(); // After rotating, it returns the new distance
     }
 }
