@@ -126,6 +126,7 @@ public class autoSafetyNet extends OpMode {
         // Runs one time when the autonomous is started
         autoRuntime.reset(); // Resets both timers
         actionRuntime.reset();
+        elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
         distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
@@ -139,6 +140,7 @@ public class autoSafetyNet extends OpMode {
         telemetry.addData("Time Elapsed For Autonomous", autoRuntime.seconds()); // Time since the autonomous has started
         telemetry.addData("Time Elapsed For Action", actionRuntime.time()); // Displays the current time since the action has started
         telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
+        telemetry.addData("Elev", elevator.getCurrentPosition());
 
         isPressed = !digitalTouch.getState();
 
@@ -146,9 +148,9 @@ public class autoSafetyNet extends OpMode {
 
             if(robotAction <= 7) {
                 goToPoleFromStart(false);
-            } else if (robotAction <= 23) {
+            } else if (robotAction <= 24) {
                 putConeOnPole();
-            } else if (robotAction == 24) {
+            } else if (robotAction == 25) {
                 encoderDrive(1.40, 0, -1, 0);
             }
 
@@ -265,7 +267,7 @@ public class autoSafetyNet extends OpMode {
             } else if (robotAction == 13) {
                 encoderDrive(0.2);
             } else if (robotAction == 14) {
-                setElevator(3600);
+                setElevator(3100);
             } else if (robotAction == 15) {
                 encoderDrive(0.2);
             } else if (robotAction == 16) {
@@ -275,16 +277,18 @@ public class autoSafetyNet extends OpMode {
             } else if (robotAction == 18) {
                 setElevator(2260);
             } else if (robotAction == 19) {
+                encoderDrive(0.2);
+            } else if (robotAction == 20) {
                 claw.setPosition(.42);
                 robotAction++;
                 actionRuntime.reset();
-            } else if (robotAction == 20) {
-                encoderDrive(0.2);
             } else if (robotAction == 21) {
-                encoderDrive(0.2, 0.5, 0, 0);
-            } else if (robotAction == 22) {
                 encoderDrive(0.2);
+            } else if (robotAction == 22) {
+                encoderDrive(0.2, 0.5, 0, 0);
             } else if (robotAction == 23) {
+                encoderDrive(0.2);
+            } else if (robotAction == 24) {
                 setElevator(0);
             }
         }
