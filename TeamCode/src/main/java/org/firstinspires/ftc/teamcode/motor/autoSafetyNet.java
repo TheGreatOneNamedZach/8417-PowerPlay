@@ -43,6 +43,7 @@ public class autoSafetyNet extends OpMode {
     public String teamColor = "Red"; // Which alliance we are currently on
     Boolean teamSelected = false; // Has the primary driver selected an alliance?
     Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
+    Boolean isPressed;
 
     public void init(){
         telemetry.addData("", "Please wait...");
@@ -52,6 +53,7 @@ public class autoSafetyNet extends OpMode {
         bR = hardwareMap.get(DcMotor.class, "Back Right");
         bL = hardwareMap.get(DcMotor.class, "Back Left");
         claw = hardwareMap.get(Servo.class, "Claw");
+        elevator = hardwareMap.get(DcMotor.class, "Elevator");
         digitalTouch = hardwareMap.get(DigitalChannel.class, "Touch Sensor");
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
@@ -138,13 +140,16 @@ public class autoSafetyNet extends OpMode {
         telemetry.addData("Time Elapsed For Action", actionRuntime.time()); // Displays the current time since the action has started
         telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
 
+        isPressed = !digitalTouch.getState();
+
         if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt")) {
 
             if(robotAction <= 7) {
                 goToPoleFromStart(false);
-            }
-            if (robotAction >= 8 && robotAction <= 12) {
+            } else if (robotAction <= 23) {
                 putConeOnPole();
+            } else if (robotAction == 24) {
+                encoderDrive(1.40, 0, -1, 0);
             }
 
             try {
@@ -222,7 +227,7 @@ public class autoSafetyNet extends OpMode {
         } else if (robotAction == 3) {
             encoderDrive(0.2);
         } else if (robotAction == 4) {
-            encoderDrive(0.15, 0, 0, 1);
+            encoderDrive(0.10, 0, 0, 0.5);
         } else if (robotAction == 5) {
             encoderDrive(0.2);
         } else if (robotAction == 6) {
@@ -240,22 +245,47 @@ public class autoSafetyNet extends OpMode {
     private void putConeOnPole() {
         if(distance[0] <= 60 || distance[0] >= 90) {
             distance = distanceSensor.scan();
+            actionRuntime.reset(); // Remove this and it skips this action
         } else {
             distanceSensor.shutdown();
             if (robotAction == 8) {
                 // Goes forwards
                 // In addition, if the pole is behind it, it goes backwards. This should never happen but it could.
-                encoderDrive(cmToSeconds(distance[3]), Integer.signum((int)distance[3]), 0, 0);
+                encoderDrive(cmToSeconds(distance[3] - 0.00), Integer.signum((int)distance[3]), 0, 0);
             } else if (robotAction == 9) {
-                //encoderDrive(0.2);
+                encoderDrive(0.2);
             } else if (robotAction == 10) {
-                encoderDrive(0.1, 0, 0, 0); // Rot 0.1
+                encoderDrive(0.05, 0, 0, 0.5); // Rot 0.1
             } else if (robotAction == 11) {
                 encoderDrive(0.2);
             } else if (robotAction == 12) {
                 // Strafes
                 // In addition, if the pole is to the left of it, it goes to the left
-                encoderDrive(cmToSeconds(distance[2]), 0, Integer.signum((int)distance[2]), 0);
+                encoderDrive(cmToSeconds(distance[2] + 3.00), 0, Integer.signum((int)distance[2]), 0);
+            } else if (robotAction == 13) {
+                encoderDrive(0.2);
+            } else if (robotAction == 14) {
+                setElevator(3600);
+            } else if (robotAction == 15) {
+                encoderDrive(0.2);
+            } else if (robotAction == 16) {
+                encoderDrive(0.2, 0.5, 0, 0);
+            } else if (robotAction == 17) {
+                encoderDrive(0.2);
+            } else if (robotAction == 18) {
+                setElevator(2260);
+            } else if (robotAction == 19) {
+                claw.setPosition(.42);
+                robotAction++;
+                actionRuntime.reset();
+            } else if (robotAction == 20) {
+                encoderDrive(0.2);
+            } else if (robotAction == 21) {
+                encoderDrive(0.2, 0.5, 0, 0);
+            } else if (robotAction == 22) {
+                encoderDrive(0.2);
+            } else if (robotAction == 23) {
+                setElevator(0);
             }
         }
     }
@@ -273,10 +303,10 @@ public class autoSafetyNet extends OpMode {
 
         // Calculates motor power
         double ratio = Math.max((Math.abs(xAxisPower) + Math.abs(yAxisPower) + Math.abs(rotationInPower)), 1); // "ratio" can be x, y, or rotation. Whichever is higher
-        double fRMotorPwr = (xAxisPower - yAxisPower + rotationInPower) / ratio; // The motor power scaled to be under 1 or greater than -1
+        double fRMotorPwr = (xAxisPower - yAxisPower - rotationInPower) / ratio; // The motor power scaled to be under 1 or greater than -1
         double fLMotorPwr = (-xAxisPower - yAxisPower + rotationInPower) / ratio;
         double bRMotorPwr = (-xAxisPower - yAxisPower - rotationInPower) / ratio;
-        double bLMotorPwr = (xAxisPower - yAxisPower - rotationInPower) / ratio;
+        double bLMotorPwr = (xAxisPower - yAxisPower + rotationInPower) / ratio;
 
         // TELEMETRY
         telemetry.addData("fRMotorPwr", fRMotorPwr * slow); // Displays the motor power on the phone screen
@@ -331,8 +361,32 @@ public class autoSafetyNet extends OpMode {
         }
     }
 
+    private void setElevator(int ticks) {
+        if(elevator.getCurrentPosition() >= ticks - 25 && ticks > 25) {
+            elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            elevator.setPower(0.025);
+            robotAction++;
+            actionRuntime.reset();
+        } else if (ticks > 25){
+            elevator.setTargetPosition(ticks);
+            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            elevator.setPower(Math.min(0.6, (3600 - elevator.getCurrentPosition()) * 0.01));
+        } else if (ticks == 0) {
+            elevator.setTargetPosition(ticks);
+            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            elevator.setPower(Math.min(0.5, (-elevator.getCurrentPosition()) * 0.005));
+            if(elevator.getCurrentPosition() <= 6) {
+                elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                elevator.setPower(0);
+                robotAction++;
+                actionRuntime.reset();
+            }
+        }
+    }
+
     @Override
     public void stop() {
+        detector.tfod.shutdown();
         super.stop(); // Stops the OpMode
     }
 }
