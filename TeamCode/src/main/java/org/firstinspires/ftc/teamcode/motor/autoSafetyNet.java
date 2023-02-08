@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.vision.distanceSensor;
 import org.firstinspires.ftc.teamcode.vision.tF8417Main;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class autoSafetyNet extends OpMode {
     double slow = .5; // Power multiplier for the robot's wheel speed
     double[] distance = {-1, -1, -1, -1};
     org.firstinspires.ftc.teamcode.vision.tF8417Main detector = new tF8417Main(); // Image detector
-    org.firstinspires.ftc.teamcode.motor.distanceSensor distanceSensor = new distanceSensor();
+    org.firstinspires.ftc.teamcode.vision.distanceSensor distanceSensor = new distanceSensor();
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     String tempDuck = null; // Stores the name of any newly found image. This will be null when no NEW image is found
     public String teamColor = "Red"; // Which alliance we are currently on
@@ -366,7 +367,7 @@ public class autoSafetyNet extends OpMode {
     }
 
     private void setElevator(int ticks) {
-        if(elevator.getCurrentPosition() >= ticks - 25 && ticks > 25) {
+        if(elevator.getCurrentPosition() >= ticks - 25 && ticks > 25 && elevator.getCurrentPosition() <= ticks + 25) {
             elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             elevator.setPower(0.025);
             robotAction++;

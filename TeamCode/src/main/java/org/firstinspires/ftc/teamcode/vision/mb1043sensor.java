@@ -65,8 +65,4 @@ public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
         }
         return lastDistance;
     }
-
-    public long getLastPingTime() {
-        return lastPingTime; // This is a method because if the variable was public it is changeable outside this class.
-    }
 }

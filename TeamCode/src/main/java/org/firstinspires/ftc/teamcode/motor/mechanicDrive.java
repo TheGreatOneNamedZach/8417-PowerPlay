@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.vision.distanceSensor;
+
 import java.text.DecimalFormat;
 
 @TeleOp(name = "Mechanum Drive", group = "e")
@@ -32,7 +34,7 @@ public class mechanicDrive extends OpMode {
     boolean firstLoop = false;
     boolean isPressed = false;
 
-    distanceSensor distanceSensor = new distanceSensor();
+    org.firstinspires.ftc.teamcode.vision.distanceSensor distanceSensor = new distanceSensor();
     double[] distance;
 
     @Override

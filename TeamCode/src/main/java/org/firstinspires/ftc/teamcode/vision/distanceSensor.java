@@ -1,14 +1,10 @@
-package org.firstinspires.ftc.teamcode.motor;
+package org.firstinspires.ftc.teamcode.vision;
 
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.vision.mb1043sensor;
 
 import java.util.Objects;
 
@@ -98,7 +94,7 @@ public class distanceSensor {
      */
     public double[] getDistanceWithoutScan() {
         int distance = mb1043sensor.getDistance();
-        double angle = Math.toRadians(servoPositionToDegrees(distanceServo.getPosition()) - 90.00 + errorFromRobotZero);
+        double angle = Math.toRadians(servoPositionToDegrees(distanceServo.getPosition()) - mb1043sensor.rangeInDegrees + errorFromRobotZero);
         double trueAngle = (Math.asin( Math.sqrt((Math.pow(distance, 2)) - 900.0) / distance) ) - angle;
         double x = distance * Math.cos(trueAngle);
         double y = distance * Math.sin(trueAngle);
@@ -111,7 +107,7 @@ public class distanceSensor {
      */
     public void distanceSensorTurnToDegree(double degree) {
         actionInProgress = "none";
-        distanceServo.setPosition(degreesToServoTicks(degree + 90 - errorFromRobotZero)); // Goes to the position
+        distanceServo.setPosition(degreesToServoTicks(degree + mb1043sensor.rangeInDegrees - errorFromRobotZero)); // Goes to the position
     }
 
     private void rotate(double degreesToTravelPerScan) {
