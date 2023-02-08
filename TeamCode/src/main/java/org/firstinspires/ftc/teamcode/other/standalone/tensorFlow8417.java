@@ -132,14 +132,15 @@ public class tensorFlow8417 extends LinearOpMode {
 
     static org.firstinspires.ftc.teamcode.other.secrets secrets = new secrets(); // If you are not team 8417, delete this line
     private static final String VUFORIA_KEY = secrets.REPLACE_ME_WITH_YOUR_OWN_VUFORIA_KEY; // This string should be your Vuforia key
-    // An example of what the VUFORIA_KEY line of code should look like:
-    // private static final String VUFORIA_KEY = "pcFBrqfDjokqVuRntctuAKXzTgoayQOKzrUbqqpXYSyVDrgsYdHytCQqTXmUeYPwgUcXlufTNnTxjcfELzmZaGYyYlnuwrmePRycYtkupohEUdIieyOsrELd";
+    /* An example of what the VUFORIA_KEY line of code should look like:
+    private static final String VUFORIA_KEY = "pcFBrqfDjokqVuRntctuAKXzTgoayQOKzrUbqqpXYSyVDrgsYdHytCQqTXmUeYPwgUcXlufTNnTxjcfELzmZaGYyYlnuwrmePRycYtkupohEUdIieyOsrELd";
+    */
     private static final String cameraName = "Webcam 1";
 
-    // Only detects images that the image detector is at LEAST 75% confidant is the correct image
-    // 75% = 0.75f
-    // The lower this number, the greater the amount of images there will be detected
-    // It is recommended that you use 80% (0.80f) especially if the model is detecting 4+ images when it should only detect 1
+    /* Only detects images that the image detector is at LEAST 75% confidant is the correct image
+    75% = 0.75f
+    The lower this number, the greater the amount of images there will be detected
+    It is recommended that you use 80% (0.80f) especially if the model is detecting 4+ images when it should only detect 1 */
     private final float minConfidenceFloat = 0.75f;
 
     private int currentModelIndex = 0;

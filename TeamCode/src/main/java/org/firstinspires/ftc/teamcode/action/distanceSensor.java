@@ -10,9 +10,18 @@ import org.firstinspires.ftc.teamcode.other.customSensors.mb1043sensor;
 
 import java.util.Objects;
 
+//████████████████████
+//░░░░░░░░░░░░░░░░░░░░
+//▌▛▀▜▐▟▄▙⍐
+
+/** This is an interface for this year's distance sensor. */
 public class distanceSensor {
+    // CONSTRUCT
+    // DECLARE NULL
     private org.firstinspires.ftc.teamcode.other.customSensors.mb1043sensor mb1043sensor;
     private Servo distanceServo;
+    private double[] prevDistance;
+    // DECLARE CUSTOM
     private static final double errorFromRobotZero = 5.00; // This is how far the USS sensor 0 degrees is off from the robot 0 degrees
     private final double servoSpinAreaInDegrees = 135.00 - errorFromRobotZero;
     private final double servoMaxRotation = 300.00;
@@ -20,12 +29,11 @@ public class distanceSensor {
     private static double degreesToTravelPerScan = 0.00;
     private static long lastSysTime = -1;
     private static final double roundingNumber = 10000.0; // The amount of zeros between the "1" and "." are the number decimal places
-    private double[] prevDistance;
-
-    // This is the upper boundary.
-    // This only matters if you have custom limits set.
+    /* This is the upper boundary.
+    This only matters if you have custom limits set. */
     private final double maxBoundaryInTicks = servoSpinAreaInDegrees / servoMaxRotation;
 
+    // METHODS
     /** Initializes the distance sensor.
      * @param opMode If you are constructing from an Auto or TeleOp, type in "this" without the quotation marks.
      */

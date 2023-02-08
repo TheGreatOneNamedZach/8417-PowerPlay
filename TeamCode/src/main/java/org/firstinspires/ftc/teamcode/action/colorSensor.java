@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+/** This is an interface for this year's color sensor. */
 public class colorSensor {
     /** Range of the sensor */
     public final double rangeInDegrees = 60.00;

@@ -1,0 +1,21 @@
+This file is for storing code that we do not want to delete.
+
+/////////////////////////////////////////
+/////       Slide PIDF System       /////
+/////////////////////////////////////////
+public void slideControl (int targetPos){
+    double currentTime = timer.milliseconds();
+    double currentError = targetPos - elevator.getCurrentPosition();
+
+    p = k_p * currentError;
+    i += k_i * (currentError * (currentTime - lastTime));
+    i = Math.max(i, -1);
+    i = Math.min(i, 1);
+    d = k_d * (currentError - lastError) / (currentTime - lastTime);
+
+    elevator.setPower(0.01 * (p + i + d));
+    telemetry.addData("", 0.01 * (p + i + d));
+
+    lastTime = currentTime;
+    lastError = currentError;
+}

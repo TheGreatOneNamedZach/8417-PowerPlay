@@ -8,19 +8,24 @@ import com.qualcomm.robotcore.hardware.configuration.annotations.DevicePropertie
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 import com.qualcomm.robotcore.util.TypeConversion;
 
-// https://github.com/EricTownselAdams/ftc_app/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/I2CXLv2.java
+/** This is an interface for the MB1043 MaxSonar sensor from MaxBotix. */
+// Based on: https://github.com/EricTownselAdams/ftc_app/blob/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/I2CXLv2.java
 @I2cDeviceType
 @DeviceProperties(name = "MaxSonar I2CXL v2", description = "MaxSonar I2CXL Sensor from MaxBotix", xmlTag = "MaxSonarI2CXLv2")
 public class mb1043sensor extends I2cDeviceSynchDevice<I2cDeviceSynch>
 {
-    private int lastDistance = -1;
+    // CONSTRUCT
+    // DECLARE NULL
     private long lastPingTime;
+    // DECLARE CUSTOM
+    private int lastDistance = -1;
     private boolean waitingForNextPing = true;
     /** Range of the sensor */
     public final double rangeInDegrees = 90.00;
     /** Minimum update delay of sensor (how quickly it spit out new data) */
     public final double minDelayInMilliseconds = 100;
 
+    // METHODS
     @Override
     public Manufacturer getManufacturer(){
         return Manufacturer.Other;
