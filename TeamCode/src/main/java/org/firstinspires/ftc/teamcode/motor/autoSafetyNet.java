@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -21,16 +23,21 @@ import java.util.Objects;
 
 @Autonomous
 public class autoSafetyNet extends OpMode {
-    DcMotor fR = null; // All four drive motors
-    DcMotor fL = null;
-    DcMotor bR = null;
-    DcMotor bL = null;
+    DcMotor fR;
+    DcMotor fL;
+    DcMotor bR;
+    DcMotor bL;
+    DcMotor elevator;
+    Servo claw;
+    DigitalChannel digitalTouch;
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
     int robotAction = 0; // Keeps track of which action the bot is currently doing
     double length = 1.0; // The time the action runs for
     double slow = .5; // Power multiplier for the robot's wheel speed
+    double[] distance = {-1, -1, -1, -1};
     org.firstinspires.ftc.teamcode.vision.tF8417Main detector = new tF8417Main(); // Image detector
+    org.firstinspires.ftc.teamcode.motor.distanceSensor distanceSensor = new distanceSensor();
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     String tempDuck = null; // Stores the name of any newly found image. This will be null when no NEW image is found
     public String teamColor = "Red"; // Which alliance we are currently on
@@ -38,10 +45,15 @@ public class autoSafetyNet extends OpMode {
     Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
 
     public void init(){
+        telemetry.addData("", "Please wait...");
+
         fR = hardwareMap.get(DcMotor.class, "Front Right"); // Hardware maps the motors
         fL = hardwareMap.get(DcMotor.class, "Front Left");
         bR = hardwareMap.get(DcMotor.class, "Back Right");
         bL = hardwareMap.get(DcMotor.class, "Back Left");
+        claw = hardwareMap.get(Servo.class, "Claw");
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "Touch Sensor");
+        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
         bL.setDirection(DcMotorSimple.Direction.REVERSE); // Sets the correct direction for the motors
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -51,13 +63,12 @@ public class autoSafetyNet extends OpMode {
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // Gives the image detector the information to access OpMode specific objects (e.g. motors, webcam, and telemetry)
+        // Gives the image detector and distance sensor the information to access OpMode specific objects (e.g. motors, webcam, and telemetry)
         detector.init(this);
+        distanceSensor.init(this);
 
         // Initialises Vuforia
         detector.initVuforia();
-
-        // TODO: Start OpenCV here.
     }
 
     // The primary driver will select which image detection model they want to use for the match
@@ -103,6 +114,7 @@ public class autoSafetyNet extends OpMode {
 
             // TELEMETRY
             // Tells the primary driver how to confirm their selection
+            // Don't add telemetry.update() or the webcam stops working properly. I have no clue why
             telemetry.addData("Status", "Press Y to confirm your team alliance.");
         }
 
@@ -113,8 +125,10 @@ public class autoSafetyNet extends OpMode {
         autoRuntime.reset(); // Resets both timers
         actionRuntime.reset();
 
-        // TODO: Shutdown the image detector here (if it does not cause lag)
+        distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
+        distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
 
+        claw.setPosition(.64);
     }
 
     @Override
@@ -125,6 +139,24 @@ public class autoSafetyNet extends OpMode {
         telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
 
         if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt")) {
+
+            if(robotAction <= 7) {
+                goToPoleFromStart(false);
+            }
+            if (robotAction >= 8 && robotAction <= 12) {
+                putConeOnPole();
+            }
+
+            try {
+                telemetry.addData("Distance", distance[0] + ", X " + distance[2] * 1 + ", Y " + distance[3]);
+                telemetry.addData("Y", cmToSeconds(distance[3]) + " || " + Integer.signum((int)distance[3]));
+                telemetry.addData("X", cmToSeconds(distance[2]) + " || " + Integer.signum((int)distance[2]));
+            } catch (Exception ignored) {}
+
+
+
+
+            /*
             // Parks in the left zone if the image is a turtle or lightning bolt
             if(robotAction == 0){ // This action is reserved for initialising motors before the robot moves (e.g. grabbing the preloaded cone)
                 //encoderDrive(length, 0, 0, 0);
@@ -134,14 +166,14 @@ public class autoSafetyNet extends OpMode {
             } else if(robotAction == 2){ // Waits for 0.2 seconds
                 encoderDrive(.2, 0,0,0);
             } else if (robotAction == 3) { // Strafes left
-                encoderDrive(length, 0,  1, 0);
+                encoderDrive(length, 0,  -1, 0);
             } else if(robotAction == 4){ // Waits for 0.2 seconds
                 encoderDrive(.2, 0,0,0);
             } else if (robotAction == 5) { // Moves forwards
                 encoderDrive(length,1, 0, 0);
             } else if(robotAction == 6){ // Waits 1 second
                 encoderDrive(length, 0,0,0);
-            }
+            }*/
         }
 
         if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
@@ -164,11 +196,11 @@ public class autoSafetyNet extends OpMode {
                 //encoderDrive(length,0,0,0);
                 robotAction++;
             } else if(robotAction == 1) { // Moves forwards off the wall
-                encoderDrive(.2, 1, 0, 0);
+                encoderDrive(.1, 1, 0, 0);
             } else if(robotAction == 2){ // Waits 0.2 seconds
                 encoderDrive(.2,0,0,0);
             } else if(robotAction == 3) { // Strafes right
-                encoderDrive(length, 0, -1, 0);
+                encoderDrive(length, 0, 1, 0);
             } else if(robotAction == 4){ // Waits 0.2 seconds
                 encoderDrive(.2,0,0,0);
             } else if(robotAction == 5) { // Moves forwards
@@ -179,29 +211,95 @@ public class autoSafetyNet extends OpMode {
         }
     }
 
-    public void encoderDrive(double secondsToRunFor, double xAxisPower, double yAxisPower, double rotationInDegrees) {
+    private void goToPoleFromStart(Boolean terminalSide) {
+        double xAxisPower = terminalSide ? -1 : 1;
+        if(robotAction == 0) {
+            encoderDrive(.1, 1, 0, 0); // Off wall
+        } else if (robotAction == 1) {
+            encoderDrive(.2);
+        } else if (robotAction == 2) {
+            encoderDrive(1, 0, xAxisPower,0); // Strafe towards pole
+        } else if (robotAction == 3) {
+            encoderDrive(0.2);
+        } else if (robotAction == 4) {
+            encoderDrive(0.15, 0, 0, 1);
+        } else if (robotAction == 5) {
+            encoderDrive(0.2);
+        } else if (robotAction == 6) {
+            encoderDrive(0.15, 1, 0, 0);
+        } else if (robotAction == 7) {
+            distanceSensor.distanceSensorTurnToDegree(15);
+            distanceSensor.startScanning(1);
+            if (actionRuntime.time() >= .5) {
+                robotAction++;
+                actionRuntime.reset();
+            }
+        }
+    }
+
+    private void putConeOnPole() {
+        if(distance[0] <= 60 || distance[0] >= 90) {
+            distance = distanceSensor.scan();
+        } else {
+            distanceSensor.shutdown();
+            if (robotAction == 8) {
+                // Goes forwards
+                // In addition, if the pole is behind it, it goes backwards. This should never happen but it could.
+                encoderDrive(cmToSeconds(distance[3]), Integer.signum((int)distance[3]), 0, 0);
+            } else if (robotAction == 9) {
+                //encoderDrive(0.2);
+            } else if (robotAction == 10) {
+                encoderDrive(0.1, 0, 0, 0); // Rot 0.1
+            } else if (robotAction == 11) {
+                encoderDrive(0.2);
+            } else if (robotAction == 12) {
+                // Strafes
+                // In addition, if the pole is to the left of it, it goes to the left
+                encoderDrive(cmToSeconds(distance[2]), 0, Integer.signum((int)distance[2]), 0);
+            }
+        }
+    }
+
+    private double cmToSeconds(double cm) {
+        // 1 field tile = 60 cm = 0.54545 seconds
+        // 1.8333 field tiles = 110 cm = 1 second
+        // 0.01667 field tiles = 1 cm = 0.0090909 seconds
+        return Math.abs(cm * 0.0090909);
+    }
+
+    public void encoderDrive(double secondsToRunFor, double yAxisPower, double xAxisPower, double rotationInPower) {
         xAxisPower = xAxisPower * 1.1; // The robot needs more power to strafe (x axis) than to go straight (y axis)
-        yAxisPower = -yAxisPower; // The Y axis is flipped
-        rotationInDegrees = -rotationInDegrees; // The rotation direction is flipped
+        rotationInPower = -rotationInPower; // The rotation direction is flipped
 
         // Calculates motor power
-        double ratio = Math.max((Math.abs(yAxisPower) + Math.abs(xAxisPower) + Math.abs(rotationInDegrees)), 1); // "ratio" can be x, y, or rot. Whichever is higher
-        double fRMotorPwr = (yAxisPower - xAxisPower + rotationInDegrees) / ratio; // The motor power scaled to be under 1 or greater than -1
-        double fLMotorPwr = (-yAxisPower - xAxisPower + rotationInDegrees) / ratio;
-        double bRMotorPwr = (-yAxisPower - xAxisPower - rotationInDegrees) / ratio;
-        double bLMotorPwr = (yAxisPower - xAxisPower - rotationInDegrees) / ratio;
+        double ratio = Math.max((Math.abs(xAxisPower) + Math.abs(yAxisPower) + Math.abs(rotationInPower)), 1); // "ratio" can be x, y, or rotation. Whichever is higher
+        double fRMotorPwr = (xAxisPower - yAxisPower + rotationInPower) / ratio; // The motor power scaled to be under 1 or greater than -1
+        double fLMotorPwr = (-xAxisPower - yAxisPower + rotationInPower) / ratio;
+        double bRMotorPwr = (-xAxisPower - yAxisPower - rotationInPower) / ratio;
+        double bLMotorPwr = (xAxisPower - yAxisPower - rotationInPower) / ratio;
 
         // TELEMETRY
-        telemetry.addData("fRMotorPwr", fRMotorPwr); // Displays the motor power on the phone screen
-        telemetry.addData("fLMotorPwr", fLMotorPwr);
-        telemetry.addData("bRMotorPwr", bRMotorPwr);
-        telemetry.addData("bLMotorPwr", bLMotorPwr);
+        telemetry.addData("fRMotorPwr", fRMotorPwr * slow); // Displays the motor power on the phone screen
+        telemetry.addData("fLMotorPwr", fLMotorPwr * slow);
+        telemetry.addData("bRMotorPwr", bRMotorPwr * slow);
+        telemetry.addData("bLMotorPwr", bLMotorPwr * slow);
 
         fR.setPower(fRMotorPwr * slow); // Makes the motors go slower
         fL.setPower(fLMotorPwr * slow);
         bR.setPower(bRMotorPwr * slow);
         bL.setPower(bLMotorPwr * slow);
         if(actionRuntime.time() >= secondsToRunFor){ // If this action runs longer than it should...
+            robotAction++; // Go to the next action
+            actionRuntime.reset(); // Reset the timer
+            fR.setPower(0); // Makes the motors go slower
+            fL.setPower(0);
+            bR.setPower(0);
+            bL.setPower(0);
+        }
+    }
+
+    public void encoderDrive(double secondsToWait) {
+        if(actionRuntime.time() >= secondsToWait){ // If this action runs longer than it should...
             robotAction++; // Go to the next action
             actionRuntime.reset(); // Reset the timer
         }
@@ -231,5 +329,10 @@ public class autoSafetyNet extends OpMode {
                 }
             }
         }
+    }
+
+    @Override
+    public void stop() {
+        super.stop(); // Stops the OpMode
     }
 }

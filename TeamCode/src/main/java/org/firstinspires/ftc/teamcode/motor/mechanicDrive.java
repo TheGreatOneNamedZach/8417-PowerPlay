@@ -44,10 +44,9 @@ public class mechanicDrive extends OpMode {
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
         fL.setDirection(DcMotorSimple.Direction.REVERSE);
-        /*
-        telemetry.addData("", "█");
-        telemetry.addData("", "↑");
-         */
+
+        telemetry.addData("20 Full Squares, Light Squares, and Others", "\n████████████████████\n░░░░░░░░░░░░░░░░░░░░\n▌▛▀▜▐▟▄▙⍐⍐⍐⍐⍐⍐⍐⍐⍐⍐⍐⍐");
+
 
         elevator = hardwareMap.get(DcMotor.class, "Elevator");
         claw = hardwareMap.get(Servo.class, "Claw");
@@ -210,7 +209,7 @@ public class mechanicDrive extends OpMode {
         if (bumpPress && clawTimer.time() >= 1.00) {
             if (closed) {
                 claw.setPosition(.64);
-                telemetry.addData("Claw", "Open");
+                telemetry.addData("Claw", "Closed");
                 closed = false;
             } else {
                 claw.setPosition(.42);
