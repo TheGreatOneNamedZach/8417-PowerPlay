@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.initialize;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,18 +10,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.action.imageDetectionTF;
-import org.firstinspires.ftc.teamcode.action.mecanumDrive;
 
 import java.util.List;
 import java.util.Objects;
 
-/**
- * This OpMode is an Autonomous.
+/** This OpMode is an Autonomous.
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
- * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous.
- */
-@Autonomous
+ * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
+@Autonomous(name = "Drive By Time + Cone", group = "Main")
 public class auto extends OpMode {
     // CONSTRUCT
     imageDetectionTF detector = new imageDetectionTF(); // Image detector
@@ -40,7 +36,7 @@ public class auto extends OpMode {
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
     int robotAction = 0; // Keeps track of which action the bot is currently doing
-    double length = 1.0; // The time the action runs for\
+    double length = 1.0; // The time the action runs for
     double[] distance = {-1, -1, -1, -1};
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     public String teamColor = "Red"; // Which alliance we are currently on
