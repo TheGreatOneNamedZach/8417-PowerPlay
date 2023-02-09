@@ -2,14 +2,12 @@ package org.firstinspires.ftc.teamcode.initialize;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.action.imageDetectionTF;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,18 +19,16 @@ import java.util.Objects;
 @Autonomous(name = "Drive By Time + Cone", group = "Main")
 public class auto extends OpMode {
     // CONSTRUCT
-    imageDetectionTF detector = new imageDetectionTF(); // Image detector
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
     // DECLARE NULL
-    DcMotor elevator;
     Servo claw;
     DigitalChannel digitalTouch;
     org.firstinspires.ftc.teamcode.action.distanceSensor distanceSensor;
     org.firstinspires.ftc.teamcode.action.mecanumDrive mecanumDrive;
+    org.firstinspires.ftc.teamcode.action.linearSlide linearSlide;
+    org.firstinspires.ftc.teamcode.action.webcam webcam;
     Boolean teamSelected; // Has the primary driver selected an alliance?
-    Boolean tFInitHasRun; // Has the TensorFlow initialise method run already?
-    Boolean isPressed;
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
     int robotAction = 0; // Keeps track of which action the bot is currently doing
@@ -40,6 +36,7 @@ public class auto extends OpMode {
     double[] distance = {-1, -1, -1, -1};
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     public String teamColor = "Red"; // Which alliance we are currently on
+    Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
 
     // METHODS
     /** Initializes the autonomous. */
@@ -47,17 +44,16 @@ public class auto extends OpMode {
         telemetry.addData("", "Please wait...");
 
         claw = hardwareMap.get(Servo.class, "Claw");
-        elevator = hardwareMap.get(DcMotor.class, "Elevator");
         digitalTouch = hardwareMap.get(DigitalChannel.class, "Touch Sensor");
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
         // Gives information to access OpMode specific objects (e.g. motors, webcam, and telemetry)
-        detector.init(this);
         distanceSensor.init(this);
         mecanumDrive.init(this);
+        linearSlide.init(this);
 
-        // Initialises Vuforia
-        detector.initVuforia();
+        // Initialises Vuforia and the webcam
+        webcam.init(this, false, true, false, null);
 
         mecanumDrive.setMaxSpeed(1.00); // Sets the maximum speed of the wheels. Slow-mode is enabled automatically so this is really 0.5
         mecanumDrive.runWithoutEncoder();
@@ -79,11 +75,11 @@ public class auto extends OpMode {
         }
         if(teamSelected) { // When the team has been selected...
             if(!tFInitHasRun) { // Initialise TensorFlow if it has not been started already
-                detector.initTfod(teamColor); // Tell TensorFlow to use the model corresponding to the alliance
+                webcam.init(this, true, false, false, teamColor);
                 tFInitHasRun = true;
             }
 
-            tempDuck = detector.imageReturn(); // The variable "tempDuck" contains the latest detected image name (if any)
+            tempDuck = webcam.tf_FindNewImages(); // The variable "tempDuck" contains the latest detected image name (if any)
             if(tempDuck != null){ // If "tempDuck" has a detected image name, it is more recent than what is currently in "duck"
                 duck = tempDuck; // Since we know the image name in "duck" is outdated, we update it to whatever image name is in "tempDuck"
             }
@@ -95,7 +91,7 @@ public class auto extends OpMode {
             } else { // If an image has been found, tell the drivers that autonomous can now be run
                 telemetry.addData("Status", "Ready! You can now run Autonomous.");
             }
-            tFTelemetry(detector.tfod); // Outputs data about all detected images to the phone screen
+            webcam.tf_OutputTelemetry(); // Outputs data about all detected images to the phone screen
         } else { // If the team has not been selected by the driver...
             if (Objects.equals(teamColor, "Blue")) { // Tell them which team is currently selected
                 telemetry.addData("Team Alliance", "You are on the " + teamColor + " alliance.\nUse B to change to the red alliance.\nPress A to use no custom sleeve.");
@@ -116,7 +112,7 @@ public class auto extends OpMode {
     public void start() {
         autoRuntime.reset(); // Resets both timers
         actionRuntime.reset();
-        elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearSlide.resetEncoder();
 
         distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
         distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
@@ -131,9 +127,7 @@ public class auto extends OpMode {
         telemetry.addData("Time Elapsed For Autonomous", autoRuntime.seconds()); // Time since the autonomous has started
         telemetry.addData("Time Elapsed For Action", actionRuntime.time()); // Displays the current time since the action has started
         telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
-        telemetry.addData("Elev", elevator.getCurrentPosition());
-
-        isPressed = !digitalTouch.getState();
+        telemetry.addData("Elev", linearSlide.getCurrentPosition());
 
         if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt")) {
 
@@ -258,7 +252,7 @@ public class auto extends OpMode {
             } else if (robotAction == 13) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 14) {
-                setElevator(3100);
+                linearSlide.goToPosition(3100);
             } else if (robotAction == 15) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 16) {
@@ -266,7 +260,7 @@ public class auto extends OpMode {
             } else if (robotAction == 17) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 18) {
-                setElevator(2260);
+                linearSlide.goToPosition(2260);
             } else if (robotAction == 19) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 20) {
@@ -280,7 +274,7 @@ public class auto extends OpMode {
             } else if (robotAction == 23) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 24) {
-                setElevator(0);
+                linearSlide.retract();
             }
         }
     }
@@ -334,33 +328,10 @@ public class auto extends OpMode {
         }
     }
 
-    private void setElevator(int ticks) {
-        if(elevator.getCurrentPosition() >= ticks - 25 && ticks > 25 && elevator.getCurrentPosition() <= ticks + 25) {
-            elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            elevator.setPower(0.025);
-            robotAction++;
-            actionRuntime.reset();
-        } else if (ticks > 25){
-            elevator.setTargetPosition(ticks);
-            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            elevator.setPower(Math.min(0.6, (3600 - elevator.getCurrentPosition()) * 0.01));
-        } else if (ticks == 0) {
-            elevator.setTargetPosition(ticks);
-            elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            elevator.setPower(Math.min(0.5, (-elevator.getCurrentPosition()) * 0.005));
-            if(elevator.getCurrentPosition() <= 6) {
-                elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                elevator.setPower(0);
-                robotAction++;
-                actionRuntime.reset();
-            }
-        }
-    }
-
     /** Stops the robot. */
     @Override
     public void stop() {
-        detector.tfod.shutdown();
+        webcam.tf_shutdown();
         super.stop(); // Stops the OpMode
     }
 }

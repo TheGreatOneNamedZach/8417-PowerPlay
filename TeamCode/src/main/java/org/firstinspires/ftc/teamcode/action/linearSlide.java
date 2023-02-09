@@ -39,8 +39,8 @@ public class linearSlide {
     public void setPower(double power) {
         power = power * totalSpeed;
 
-        if (!(touchSensor.getState() && power < 0)) { // Everything BUT moving the slides down when fully retracted.
-            if (power == 0 && !touchSensor.getState()) { // If the slides are not moving AND the limit switch is not pressed...
+        if (!(touchSensorPressed() && power < 0)) { // Everything BUT moving the slides down when fully retracted.
+            if (power == 0 && !touchSensorPressed()) { // If the slides are not moving AND the limit switch is not pressed...
                 // This means the slide needs to hover at its position
                 linearSlide.setPower(hoverSpeed);
             } else if(power == 0) { // If the slides are not moving AND the limit switch is pressed...
@@ -135,11 +135,31 @@ public class linearSlide {
             B.) The deviation from its target position multiplied by 0.005
              */
 
-            if(linearSlide.getCurrentPosition() <= 6 && touchSensor.getState()) {
+            if(linearSlide.getCurrentPosition() <= 6 && touchSensorPressed()) {
                 // This means the slide is fully retracted. This is the perfect opportunity to recalibrate the encoders
                 linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 linearSlide.setPower(0);
             }
         }
+    }
+
+    /** Resets the encoder value for the slides. */
+    public void resetEncoder() {
+        linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    /** Returns the current position of the slides
+     * @return Returns as an int in ticks.
+     */
+    public int getCurrentPosition() {
+        return linearSlide.getCurrentPosition();
+    }
+
+    /** Returns if the touch sensor is pressed or not.
+     * @return Returns as a Boolean. True if pressed. False if not.
+     */
+    public Boolean touchSensorPressed() {
+        return touchSensor.getState();
     }
 }

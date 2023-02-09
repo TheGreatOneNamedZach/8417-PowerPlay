@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.action;
+package org.firstinspires.ftc.teamcode.other.customSensors;
 
 import androidx.annotation.NonNull;
 
@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -50,11 +51,11 @@ public class imageDetectionTF {
     }
 
     /** Initializes Vuforia */
-    public void initVuforia() {
+    public void initVuforia(CameraName cameraName) {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        parameters.cameraName = cameraName;
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
