@@ -125,9 +125,10 @@ public class auto extends OpMode {
         distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
         distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
 
+        /*
         claw.close();
         swivel.goToBack();
-        swivel.goToFront();
+        swivel.goToFront();*/
     }
 
     /** Loops until the stop button is pressed. */
@@ -262,11 +263,14 @@ public class auto extends OpMode {
             } else if (robotAction == 13) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 14) {
+                /*
                 linearSlide.goToPosition(3000);
                 if(linearSlide.getCurrentPosition() >= 2975) {
                     robotAction++;
                     actionRuntime.reset();
-                }
+                }*/
+                robotAction++;
+                actionRuntime.time(); // TODO: Remove this they are temp
             } else if (robotAction == 15) {
                 distanceSensor.distanceSensorTurnToDegree(0);
                 waitThenGoToNextAction(0.5);
@@ -285,11 +289,12 @@ public class auto extends OpMode {
             } else if (robotAction == 17) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 18) {
+                /*
                 linearSlide.goToPosition(2260);
                 if(linearSlide.getCurrentPosition() <= 2285) {
                     robotAction++;
                     actionRuntime.reset();
-                }
+                }*/
             } else if (robotAction == 19) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 20) {
