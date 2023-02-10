@@ -8,16 +8,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.other.customSensors.customOpenCV;
 import org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
 public class webcam {
     // CONSTRUCT
     org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF imageDetectionTF = new imageDetectionTF();
-    org.firstinspires.ftc.teamcode.other.customSensors.customOpenCV customOpenCV = new customOpenCV();
     // DECLARE NULL
     Telemetry telemetry;
     // DECLARE CUSTOM
@@ -25,7 +22,7 @@ public class webcam {
 
     // METHODS
 
-    public void init(@NonNull OpMode opMode, @NonNull Boolean tensorFlow, @NonNull Boolean vuforia, @NonNull Boolean openCV, String teamColor) {
+    public void init(@NonNull OpMode opMode, @NonNull Boolean tensorFlow, @NonNull Boolean vuforia, String teamColor) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         if (vuforia || tensorFlow) {
@@ -39,9 +36,6 @@ public class webcam {
         }
         if (tensorFlow) {
             imageDetectionTF.initTfod(teamColor);
-        }
-        if (openCV) {
-            customOpenCV.init(opMode, webcamName, 640, 480, OpenCvCameraRotation.UPRIGHT);
         }
         telemetry = opMode.telemetry;
     }

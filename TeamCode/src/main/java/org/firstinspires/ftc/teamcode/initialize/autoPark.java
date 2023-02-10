@@ -2,18 +2,11 @@ package org.firstinspires.ftc.teamcode.initialize;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.action.claw;
-import org.firstinspires.ftc.teamcode.action.colorSensor;
-import org.firstinspires.ftc.teamcode.action.distanceSensor;
-import org.firstinspires.ftc.teamcode.action.linearSlide;
 import org.firstinspires.ftc.teamcode.action.mecanumDrive;
-import org.firstinspires.ftc.teamcode.action.swivel;
 import org.firstinspires.ftc.teamcode.action.webcam;
 
 import java.util.List;
@@ -23,29 +16,22 @@ import java.util.Objects;
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
-@Autonomous(name = "Drive By Time + Cone", group = "Main")
-public class auto extends OpMode {
+@Autonomous(name = "Drive By Time", group = "Main")
+public class autoPark extends OpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
-    org.firstinspires.ftc.teamcode.action.distanceSensor distanceSensor = new distanceSensor();
     org.firstinspires.ftc.teamcode.action.mecanumDrive mecanumDrive = new mecanumDrive();
-    org.firstinspires.ftc.teamcode.action.linearSlide linearSlide = new linearSlide();
     org.firstinspires.ftc.teamcode.action.webcam webcam = new webcam();
-    org.firstinspires.ftc.teamcode.action.colorSensor colorSensor = new colorSensor();
-    org.firstinspires.ftc.teamcode.action.claw claw = new claw();
-    org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
     int robotAction = 0; // Keeps track of which action the bot is currently doing
     double length = 1.0; // The time the action runs for
-    double[] distance = {-1, -1, -1, -1};
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     public String teamColor = "Red"; // Which alliance we are currently on
     Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
     Boolean teamSelected = false; // Has the primary driver selected an alliance?
-    private static double timeLimit = 0.00;
 
     // METHODS
     /** Initializes the autonomous. */
@@ -53,12 +39,7 @@ public class auto extends OpMode {
         telemetry.addData("", "Please wait...");
 
         // Gives information to access OpMode specific objects (e.g. motors, webcam, and telemetry)
-        distanceSensor.init(this);
         mecanumDrive.init(this);
-        linearSlide.init(this);
-        colorSensor.init(this);
-        claw.init(this);
-        swivel.init(this);
 
         // Initialises Vuforia and the webcam
         webcam.init(this, false, true, null);
@@ -83,7 +64,7 @@ public class auto extends OpMode {
         }
         if(teamSelected) { // When the team has been selected...
             if(!tFInitHasRun) { // Initialise TensorFlow if it has not been started already
-                webcam.init(this, true, false, teamColor);
+                webcam.init(this, true, false,  teamColor);
                 tFInitHasRun = true;
             }
 
@@ -120,14 +101,6 @@ public class auto extends OpMode {
     public void start() {
         autoRuntime.reset(); // Resets both timers
         actionRuntime.reset();
-        linearSlide.resetEncoder();
-
-        distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
-        distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
-
-        claw.close();
-        swivel.goToBack();
-        swivel.goToFront();
     }
 
     /** Loops until the stop button is pressed. */
@@ -137,26 +110,8 @@ public class auto extends OpMode {
         telemetry.addData("Time Elapsed For Autonomous", autoRuntime.seconds()); // Time since the autonomous has started
         telemetry.addData("Time Elapsed For Action", actionRuntime.time()); // Displays the current time since the action has started
         telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
-        telemetry.addData("Elev", linearSlide.getCurrentPosition());
 
         if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt")) {
-
-            if(robotAction <= 7) {
-                goToPoleFromStart(false);
-            } else if (robotAction <= 24) {
-                putConeOnPole();
-            } else if (robotAction == 25) {
-                mecanumDrive(1.95, 0, -1, 0);
-            }
-
-            try {
-                telemetry.addData("Distance", distance[0] + ", X " + distance[2] * 1 + ", Y " + distance[3]);
-                telemetry.addData("Y", cmToSeconds(distance[3]) + " || " + Integer.signum((int)distance[3]));
-                telemetry.addData("X", cmToSeconds(distance[2]) + " || " + Integer.signum((int)distance[2]));
-            } catch (Exception ignored) {}
-
-
-
 
             /*
             // Parks in the left zone if the image is a turtle or lightning bolt
@@ -176,138 +131,44 @@ public class auto extends OpMode {
             } else if(robotAction == 6){ // Waits 1 second
                 mecanumDrive(length, 0,0,0);
             }*/
+
+            if(robotAction == 0) {
+                mecanumDrive(.2, 1, 0, 0);
+            } else if(robotAction == 1) {
+                waitThenGoToNextAction(0.2);
+                mecanumDrive(length, 0, -1, 0);
+            } else if(robotAction == 2){
+                waitThenGoToNextAction(0.2);
+            } else if(robotAction == 3){
+                mecanumDrive(length, 1, 0,0);
+            }
         }
 
         if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
             // Parks in the middle zone if the image is a robot or light bulb
             // If no image is ever found, this will run
             // If the driver does not wait for the image detector to load, this will run
-            if(robotAction == 0){ // This action is reserved
-                //mecanumDrive(length, 0,0,0);
-                robotAction++;
-            } else if(robotAction == 1) { // Moves forward for 1.5 seconds
+            if(robotAction == 0) { // Moves forward for 1.5 seconds
                 mecanumDrive(length + .5, 1, 0, 0);
-            } else if(robotAction == 2){ // Waits 0.2 seconds
+            } else if(robotAction == 1){ // Waits 0.2 seconds
                 mecanumDrive(.2,0,0,0);
             }
         }
 
         if(Objects.equals(duck, "Handsaw") || Objects.equals(duck, "Panel")) {
             // Parks in the right zone if the image is the handsaw or solar panel
-            if(robotAction == 0){ // This action is reserved
-                //mecanumDrive(length,0,0,0);
-                robotAction++;
-            } else if(robotAction == 1) { // Moves forwards off the wall
-                mecanumDrive(.1, 1, 0, 0);
-            } else if(robotAction == 2){ // Waits 0.2 seconds
+            if(robotAction == 0) { // Moves forwards off the wall
+                mecanumDrive(.2, 1, 0, 0);
+            } else if(robotAction == 1){ // Waits 0.2 seconds
                 mecanumDrive(.2,0,0,0);
-            } else if(robotAction == 3) { // Strafes right
+            } else if(robotAction == 2) { // Strafes right
                 mecanumDrive(length, 0, 1, 0);
-            } else if(robotAction == 4){ // Waits 0.2 seconds
+            } else if(robotAction == 3){ // Waits 0.2 seconds
                 mecanumDrive(.2,0,0,0);
-            } else if(robotAction == 5) { // Moves forwards
+            } else if(robotAction == 4) { // Moves forwards
                 mecanumDrive(length, 1, 0, 0);
-            } else if(robotAction == 6) { // Waits 0.2 seconds
+            } else if(robotAction == 5) { // Waits 0.2 seconds
                 mecanumDrive(.2, 0, 0, 0);
-            }
-        }
-    }
-
-    private void goToPoleFromStart(Boolean terminalSide) {
-        double xAxisPower = terminalSide ? -1 : 1;
-        if(robotAction == 0) {
-            mecanumDrive(.15, 1, 0, 0); // Off wall
-        } else if (robotAction == 1) {
-            waitThenGoToNextAction(.2);
-        } else if (robotAction == 2) {
-            mecanumDrive(0.9, 0, xAxisPower,0); // Strafe towards pole
-        } else if (robotAction == 3) {
-            waitThenGoToNextAction(0.2);
-        } else if (robotAction == 4) {
-            mecanumDrive(0.10, 0, 0, 0.5);
-        } else if (robotAction == 5) {
-            waitThenGoToNextAction(0.2);
-        } else if (robotAction == 6) {
-            mecanumDrive(0.15, 1, 0, 0);
-        } else if (robotAction == 7) {
-            distanceSensor.distanceSensorTurnToDegree(14);
-            distanceSensor.startScanning(1);
-            if (actionRuntime.time() >= .5) {
-                robotAction++;
-                actionRuntime.reset();
-            }
-        }
-    }
-
-    private void putConeOnPole() {
-        if(distance[0] <= 60 || distance[0] >= 90) {
-            distance = distanceSensor.scan();
-            actionRuntime.reset(); // Remove this and it skips the next action
-        } else {
-            distanceSensor.shutdown();
-            if (robotAction == 8) {
-                // Goes forwards
-                // In addition, if the pole is behind it, it goes backwards. This should never happen but it could.
-                mecanumDrive(cmToSeconds(distance[3] + 0.00), Integer.signum((int)distance[3]), 0, 0);
-            } else if (robotAction == 9) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 10) {
-                mecanumDrive(0.05, 0, 0, 0.0); // Rot 0.5
-            } else if (robotAction == 11) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 12) {
-                // Strafes
-                // In addition, if the pole is to the left of it, it goes to the left
-                mecanumDrive(cmToSeconds(distance[2] + 3.00), 0, Integer.signum((int)distance[2]), 0);
-            } else if (robotAction == 13) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 14) {
-                linearSlide.goToPosition(3000);
-                if(linearSlide.getCurrentPosition() >= 2975) {
-                    robotAction++;
-                    actionRuntime.reset();
-                }
-            } else if (robotAction == 15) {
-                distanceSensor.distanceSensorTurnToDegree(0);
-                waitThenGoToNextAction(0.5);
-            } else if (robotAction == 16) {
-                mecanumDrive.setPower(0, -0.25, 0); // Moves forwards until it detects the pole. Y is negative to go forwards in setpower()
-                if(actionRuntime.time() >= 1.5){ // If this action runs longer than it should...
-                    timeLimit = 1.5;
-                    robotAction++; // Go to the next action
-                    actionRuntime.reset(); // Reset the timer
-                    mecanumDrive.setPower(0, 0, 0);
-                }
-                if(colorSensor.getDistance() <= 20.00) { // If there is a pole
-                    timeLimit = actionRuntime.time();
-                    mecanumDrive(0.6, -0.25, 0, 0); // Move back a bit because the robot is too close
-                }
-            } else if (robotAction == 17) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 18) {
-                linearSlide.goToPosition(2260);
-                if(linearSlide.getCurrentPosition() <= 2285) {
-                    robotAction++;
-                    actionRuntime.reset();
-                }
-            } else if (robotAction == 19) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 20) {
-                claw.open();
-                robotAction++;
-                actionRuntime.reset();
-            } else if (robotAction == 21) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 22) {
-                mecanumDrive(timeLimit - 0.6, -0.25, 0, 0); // Goes back for as long as it went forwards minus 0.25 seconds
-            } else if (robotAction == 23) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 24) {
-                linearSlide.retract();
-                if(linearSlide.getCurrentPosition() <= 6) {
-                    robotAction++;
-                    actionRuntime.reset();
-                }
             }
         }
     }
