@@ -38,7 +38,7 @@ public class mecanumDrive {
         bL = hardwareMap.get(DcMotor.class, "Back Left");
 
         fR.setDirection(DcMotorSimple.Direction.REVERSE);
-        fL.setDirection(DcMotorSimple.Direction.REVERSE);
+        bR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         fR.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // Sets the mode of the motors to run WITHOUT encoders
         fL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -91,14 +91,13 @@ public class mecanumDrive {
      */
     public void setPower(double x, double y, double rot) {//rot is short for rotation
         x = x * 1.1;
-        rot = -rot;
 
         //Code to calculate motor power
         double ratio = Math.max((Math.abs(x) + Math.abs(y) + Math.abs(rot)), 1);
-        double fRMotorPwr = (x - y - rot) / ratio;
-        double fLMotorPwr = (-x - y + rot) / ratio;
-        double bRMotorPwr = (-x - y - rot) / ratio;
-        double bLMotorPwr = (x - y + rot) / ratio;
+        double fRMotorPwr = (-x - y - rot) / ratio;
+        double fLMotorPwr = (x - y + rot) / ratio;
+        double bRMotorPwr = (x - y - rot) / ratio;
+        double bLMotorPwr = (-x - y + rot) / ratio;
 
         telemetry.addData("fRMotorPwr", df.format(fRMotorPwr));
         telemetry.addData("fLMotorPwr", df.format(fLMotorPwr));

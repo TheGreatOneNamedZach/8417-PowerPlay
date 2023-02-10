@@ -13,11 +13,11 @@ public class claw {
     private static final ElapsedTime delay = new ElapsedTime();
     // DECLARE NULL
     private static Servo claw;
-    private static Boolean isClosed;
     // DECLARE CUSTOM
     private static double delayInSeconds = 0.75;
     private static final double closedPositionInTicks = 0.64;
     private static final double openPositionInTicks = 0.42;
+    private static Boolean isClosed = false;
 
     // METHODS
     /** Initializes the claw.
@@ -26,6 +26,7 @@ public class claw {
     public void init(@NonNull OpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         claw = hardwareMap.get(Servo.class, "Claw");
+        isClosed = false;
     }
 
     /** Moves the claw to the opposite position of where it currently is.

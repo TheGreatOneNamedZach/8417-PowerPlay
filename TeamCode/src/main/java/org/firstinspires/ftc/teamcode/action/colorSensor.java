@@ -23,7 +23,7 @@ public class colorSensor {
     /** Finds the distance. Minimum range of 5cm and maximum of 25cm.
      * @return Distance in cm.
      */
-    private double getDistance() {
+    public double getDistance() {
         return ((DistanceSensor) colorSensor).getDistance(DistanceUnit.CM);
     }
 }

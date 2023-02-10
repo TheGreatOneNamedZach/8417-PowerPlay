@@ -8,16 +8,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.other.customSensors.customOpenCV;
+import org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
 public class webcam {
     // CONSTRUCT
-
+    org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF imageDetectionTF = new imageDetectionTF();
+    org.firstinspires.ftc.teamcode.other.customSensors.customOpenCV customOpenCV = new customOpenCV();
     // DECLARE NULL
-    org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF imageDetectionTF;
-    org.firstinspires.ftc.teamcode.other.customSensors.customOpenCV customOpenCV;
     Telemetry telemetry;
     // DECLARE CUSTOM
     Boolean hasAlreadyRun = false;

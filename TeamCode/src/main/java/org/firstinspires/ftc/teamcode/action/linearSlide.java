@@ -8,16 +8,20 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /** This is an interface for this year's distance sensor. */
 public class linearSlide {
     // CONSTRUCT
     // DECLARE NULL
     DcMotor linearSlide;
     DigitalChannel touchSensor; // True when pressed
+    Telemetry telemetry;
     // DECLARE CUSTOM
     private static double totalSpeed = 0.75; // Speed multiplier for the slide
     private static final double maxAutoSpeed = 0.6; // Maximum speed the linear slide can operate at AUTOMATICALLY. "Auto" does not stand for "autonomous"
-    private static final double hoverSpeed = 0.025; // Speed at which the slide can hover
+    private static final double hoverSpeed = 0.012; // Speed at which the slide can hover
+    private static double slidePower = 0.00;
 
     // METHODS
     /** Initializes the linear slide.
@@ -25,7 +29,8 @@ public class linearSlide {
      */
     public void init(@NonNull OpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
-        linearSlide = hardwareMap.get(DcMotor.class, "linearSlide");
+        telemetry = opMode.telemetry;
+        linearSlide = hardwareMap.get(DcMotor.class, "Linear Slide");
         touchSensor = hardwareMap.get(DigitalChannel.class, "Touch Sensor");
         touchSensor.setMode(DigitalChannel.Mode.INPUT);
         linearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -37,18 +42,18 @@ public class linearSlide {
      * @param power power to move the slides at. This is multiplied by the max speed.
      */
     public void setPower(double power) {
-        power = power * totalSpeed;
+        slidePower = power * totalSpeed;
 
-        if (!(touchSensorPressed() && power < 0)) { // Everything BUT moving the slides down when fully retracted.
-            if (power == 0 && !touchSensorPressed()) { // If the slides are not moving AND the limit switch is not pressed...
+        if (!(touchSensorPressed() && slidePower < 0)) { // Everything BUT moving the slides down when fully retracted.
+            if (slidePower == 0 && !touchSensorPressed()) { // If the slides are not moving AND the limit switch is not pressed...
                 // This means the slide needs to hover at its position
                 linearSlide.setPower(hoverSpeed);
-            } else if(power == 0) { // If the slides are not moving AND the limit switch is pressed...
+            } else if(slidePower == 0) { // If the slides are not moving AND the limit switch is pressed...
                 // This means the slides are fully retracted. This is the perfect opportunity to recalibrate the encoders
                 linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             } else { // The slides must be moving
                 linearSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                linearSlide.setPower(power);
+                linearSlide.setPower(slidePower);
             }
         }
     }
@@ -80,7 +85,7 @@ public class linearSlide {
         } else if (middle) {
             goToPosition(2260);
         } else if (high) {
-            goToPosition(3600);
+            goToPosition(3000);
         }
     }
 
@@ -129,7 +134,7 @@ public class linearSlide {
                 Ticks is 0 */
             linearSlide.setTargetPosition(ticks);
             linearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlide.setPower(Math.min(maxAutoSpeed, (-linearSlide.getCurrentPosition()) * 0.005));
+            linearSlide.setPower(Math.min(maxAutoSpeed, (linearSlide.getCurrentPosition()) * 0.005));
             /* Sets the power to be whichever is smaller:
             A.) A base power of the maximum allowed speed (maxAutoSpeed)
             B.) The deviation from its target position multiplied by 0.005
@@ -160,6 +165,13 @@ public class linearSlide {
      * @return Returns as a Boolean. True if pressed. False if not.
      */
     public Boolean touchSensorPressed() {
-        return touchSensor.getState();
+        return !touchSensor.getState();
+    }
+
+    public void telemetryOutput() {
+        telemetry.addData("Power", slidePower);
+        telemetry.addData("Touch Sensor", touchSensorPressed());
+        telemetry.addData("Mode", linearSlide.getMode().toString());
+        telemetry.addData("Ticks", linearSlide.getCurrentPosition());
     }
 }
