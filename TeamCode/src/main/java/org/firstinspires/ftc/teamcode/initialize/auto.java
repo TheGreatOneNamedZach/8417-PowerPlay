@@ -45,6 +45,7 @@ public class auto extends OpMode {
     public String teamColor = "Red"; // Which alliance we are currently on
     Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
     Boolean teamSelected = false; // Has the primary driver selected an alliance?
+    Boolean startLeftSide = true;
     private static double timeLimit = 0.00;
 
     // METHODS
@@ -80,6 +81,10 @@ public class auto extends OpMode {
             teamColor = "Default";
         } else if (gamepad1.y) { // If the Y button is pressed, the driver has selected an alliance
             teamSelected = true;
+        } else if (gamepad1.dpad_left) {
+            startLeftSide = true;
+        } else if (gamepad1.dpad_right) {
+            startLeftSide = false;
         }
         if(teamSelected) { // When the team has been selected...
             if(!tFInitHasRun) { // Initialise TensorFlow if it has not been started already
@@ -108,11 +113,16 @@ public class auto extends OpMode {
             } else {
                 telemetry.addData("Team Alliance", "You are using the " + teamColor + " signal cone.\nUse X to change to the blue alliance.\nUse B to change to the red alliance.");
             }
+            if (startLeftSide) {
+                telemetry.addData("Side", "You are starting on the left side of the field.");
+            } else {
+                telemetry.addData("Side", "You are starting on the right sie of the field.");
+            }
 
             // TELEMETRY
             // Tells the primary driver how to confirm their selection
             // Don't add telemetry.update() or the webcam stops working properly. I have no clue why
-            telemetry.addData("Status", "Press Y to confirm your team alliance.");
+            telemetry.addData("Status", "Press Y to confirm your team alliance and starting side.");
         }
     }
 
@@ -125,10 +135,8 @@ public class auto extends OpMode {
         distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
         distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
 
-        /*
         claw.close();
-        swivel.goToBack();
-        swivel.goToFront();*/
+        swivel.goToFront();
     }
 
     /** Loops until the stop button is pressed. */
@@ -143,11 +151,19 @@ public class auto extends OpMode {
         if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt")) {
 
             if(robotAction <= 7) {
-                goToPoleFromStart(false);
+                goToPoleFromStart(startLeftSide);
             } else if (robotAction <= 24) {
                 putConeOnPole();
             } else if (robotAction == 25) {
-                mecanumDrive(1.95, 0, -1, 0);
+                mecanumDrive(1.0, 0, -1, 0);
+            } else if (robotAction == 26) {
+                waitThenGoToNextAction(0.2);
+            } else if (robotAction == 27) {
+                mecanumDrive(0.25, -1, 0, 0);
+            } else if (robotAction == 28) {
+                waitThenGoToNextAction(0.2);
+            } else if (robotAction == 29) {
+                mecanumDrive(1.5, 0, -1, 0);
             }
 
             try {
@@ -215,7 +231,7 @@ public class auto extends OpMode {
     }
 
     private void goToPoleFromStart(Boolean terminalSide) {
-        double xAxisPower = terminalSide ? -1 : 1;
+        double xAxisPower = terminalSide ? 1 : -1;
         if(robotAction == 0) {
             mecanumDrive(.15, 1, 0, 0); // Off wall
         } else if (robotAction == 1) {
@@ -241,15 +257,21 @@ public class auto extends OpMode {
     }
 
     private void putConeOnPole() {
+        telemetry.addData("ColorDistance", colorSensor.getDistance());
         if(distance[0] <= 60 || distance[0] >= 90) {
-            distance = distanceSensor.scan();
+            if(startLeftSide) {
+                distance = distanceSensor.scanRight();
+            } else {
+                distance = distanceSensor.scanLeft();
+            }
             actionRuntime.reset(); // Remove this and it skips the next action
         } else {
             distanceSensor.shutdown();
             if (robotAction == 8) {
                 // Goes forwards
                 // In addition, if the pole is behind it, it goes backwards. This should never happen but it could.
-                mecanumDrive(cmToSeconds(distance[3] + 0.00), Integer.signum((int)distance[3]), 0, 0);
+                double offset = startLeftSide ? 0.00 : -0.00;
+                mecanumDrive(cmToSeconds(distance[3] + offset), Integer.signum((int)distance[3]), 0, 0);
             } else if (robotAction == 9) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 10) {
@@ -259,42 +281,53 @@ public class auto extends OpMode {
             } else if (robotAction == 12) {
                 // Strafes
                 // In addition, if the pole is to the left of it, it goes to the left
-                mecanumDrive(cmToSeconds(distance[2] + 3.00), 0, Integer.signum((int)distance[2]), 0);
+                double offset = startLeftSide ? -1.00 : 0.00;
+                mecanumDrive(cmToSeconds(distance[2] + offset), 0, Integer.signum((int)distance[2]), 0);
             } else if (robotAction == 13) {
-                waitThenGoToNextAction(0.2);
-            } else if (robotAction == 14) {
-                /*
+                distanceSensor.returnToStart();
+                waitThenGoToNextAction(0.5);
+            } /*
+            else if (robotAction == 14) {
+                double offset = startLeftSide ? -0.15 : 0.00;
+                mecanumDrive.setPower(offset, 0, 0);
+                if(actionRuntime.time() >= 3){ // If this action runs longer than it should...
+                    mecanumDrive(3.0, 0.0, offset, 0);
+                }
+                if(colorSensor.getDistance() <= 50.00) { // If there is a pole
+                    mecanumDrive(0.75, 0, offset, 0); // Move back a bit because the robot is too close
+                }
+            }
+            */
+            else if (robotAction == 14) {
                 linearSlide.goToPosition(3000);
                 if(linearSlide.getCurrentPosition() >= 2975) {
                     robotAction++;
                     actionRuntime.reset();
-                }*/
-                robotAction++;
-                actionRuntime.time(); // TODO: Remove this they are temp
+                }
             } else if (robotAction == 15) {
                 distanceSensor.distanceSensorTurnToDegree(0);
                 waitThenGoToNextAction(0.5);
             } else if (robotAction == 16) {
-                mecanumDrive.setPower(0, -0.25, 0); // Moves forwards until it detects the pole. Y is negative to go forwards in setpower()
-                if(actionRuntime.time() >= 1.5){ // If this action runs longer than it should...
-                    timeLimit = 1.5;
+                if(actionRuntime.time() >= 3){ // If this action runs longer than it should...
+                    timeLimit = 3;
                     robotAction++; // Go to the next action
                     actionRuntime.reset(); // Reset the timer
                     mecanumDrive.setPower(0, 0, 0);
                 }
-                if(colorSensor.getDistance() <= 20.00) { // If there is a pole
+                if(colorSensor.getDistance() <= 50.00) { // If there is a pole
                     timeLimit = actionRuntime.time();
-                    mecanumDrive(0.6, -0.25, 0, 0); // Move back a bit because the robot is too close
+                    mecanumDrive(2.5, -0.25, 0, 0); // Move back a bit because the robot is too close
+                } else {
+                    mecanumDrive.setPower(0, -0.15, 0); // Moves forwards until it detects the pole. Y is negative to go forwards in setpower()
                 }
             } else if (robotAction == 17) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 18) {
-                /*
                 linearSlide.goToPosition(2260);
                 if(linearSlide.getCurrentPosition() <= 2285) {
                     robotAction++;
                     actionRuntime.reset();
-                }*/
+                }
             } else if (robotAction == 19) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 20) {
@@ -304,7 +337,7 @@ public class auto extends OpMode {
             } else if (robotAction == 21) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 22) {
-                mecanumDrive(timeLimit - 0.6, -0.25, 0, 0); // Goes back for as long as it went forwards minus 0.25 seconds
+                mecanumDrive(timeLimit - 0.5, -0.15, 0, 0); // Goes back for as long as it went forwards minus 0.25 seconds
             } else if (robotAction == 23) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 24) {

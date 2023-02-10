@@ -31,6 +31,7 @@ public class teleOp extends OpMode {
         claw.init(this);
         swivel.init(this);
         linearSlide.init(this);
+        distanceSensor.init(this);
     }
 
     /** Runs one time when the teleop starts. */

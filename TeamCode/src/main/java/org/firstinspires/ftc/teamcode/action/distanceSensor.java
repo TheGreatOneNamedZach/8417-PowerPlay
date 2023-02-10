@@ -102,10 +102,18 @@ public class distanceSensor {
      * @apiNote Want to temperately stop rotating the sensor? Use freeze(). This is the same as freeze() if this method is called only when scan() is not.
      * @return  Returns as a double[]. Returns the distance, the degree of its highest clockwise boundary, the x, and the y.
      */
-    public double[] getDistanceWithoutScan() {
+    public double[] getRightDistanceWithoutScan() {
         int distance = mb1043sensor.getDistance();
         double angle = Math.toRadians(servoPositionToDegrees(distanceServo.getPosition()) - mb1043sensor.rangeInDegrees + errorFromRobotZero);
         double trueAngle = (Math.asin( Math.sqrt((Math.pow(distance, 2)) - 900.0) / distance) ) - angle;
+        double x = distance * Math.cos(trueAngle);
+        double y = distance * Math.sin(trueAngle);
+        return new double[] {distance, ((Math.toDegrees(angle) * roundingNumber) / roundingNumber), x, y};
+    }
+    public double[] getLeftDistanceWithoutScan() {
+        int distance = mb1043sensor.getDistance();
+        double angle = Math.toRadians(servoPositionToDegrees(distanceServo.getPosition()) - mb1043sensor.rangeInDegrees + errorFromRobotZero);
+        double trueAngle = 180 - (Math.asin( Math.sqrt((Math.pow(distance, 2)) - 900.0) / distance) ) - angle;
         double x = distance * Math.cos(trueAngle);
         double y = distance * Math.sin(trueAngle);
         return new double[] {distance, ((Math.toDegrees(angle) * roundingNumber) / roundingNumber), x, y};
@@ -156,12 +164,12 @@ public class distanceSensor {
      * @apiNote scan() was made to be called continuously in a loop() or while() statement.
      * @return Returns as a double[]. Returns the distance, the degree of its highest clockwise boundary, the x, and the y.
      */
-    public double[] scan() {
+    public double[] scanRight() {
         if(Objects.equals(actionInProgress, "shutdown")) {
             return prevDistance;
         }
 
-        double[] disAndRot = getDistanceWithoutScan();
+        double[] disAndRot = getRightDistanceWithoutScan();
         if(delayNotFinished() || Objects.equals(actionInProgress, "none")) {
             prevDistance = disAndRot;
             return disAndRot;
@@ -238,13 +246,105 @@ public class distanceSensor {
             degreesToTravelPerScan = degreesToTravelPerScan * -1.00; // So reverse directions to go back to the opposite boundary
             rotate(degreesToTravelPerScan);
             prevDistance = disAndRot;
-            return getDistanceWithoutScan(); // After rotating, it returns the new distance
+            return getRightDistanceWithoutScan(); // After rotating, it returns the new distance
 
         }
         
         // If the sensor is not at a boundary...
         rotate(degreesToTravelPerScan);
         prevDistance = disAndRot;
-        return getDistanceWithoutScan(); // After rotating, it returns the new distance
+        return getRightDistanceWithoutScan(); // After rotating, it returns the new distance
+    }
+
+    public double[] scanLeft() {
+        if(Objects.equals(actionInProgress, "shutdown")) {
+            return prevDistance;
+        }
+
+        double[] disAndRot = getRightDistanceWithoutScan();
+        if(delayNotFinished() || Objects.equals(actionInProgress, "none")) {
+            prevDistance = disAndRot;
+            return disAndRot;
+        }
+        /* Anything below this line will not run until:
+        1.) The distance sensor receives the light/sound it sent out
+        2.) The user actually tells the distance sensor how it should run
+         */
+
+
+
+
+        /* Stops rotating if rotating the sensor would cause it to leave the minimum or maximum boundaries
+                In addition, if it is currently executing "sweepOnce", it will finish the second half
+                In addition, if it is currently executing a "scanOnce", it will stop
+           Else, it will reverse direction */
+        if(
+                (((distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) < 0.00) // If rotating would exit the lower boundary...
+                        && //...and...
+                        (degreesToTravelPerScan <= 0.00)) //...it is traveling towards the lower boundary
+                        || // OR
+                        (((distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) > maxBoundaryInTicks) // If rotating would exit the higher boundary...
+                                && //...and...
+                                (degreesToTravelPerScan >= 0.00)) //...it is traveling towards the higher boundary
+        ) { // TL;DR, when it hits reaches a boundary, the following happens:
+
+
+
+            if(
+                    Objects.equals(actionInProgress, "sweepOnce") // If we are doing a single sweep...
+                            && //...and...
+                            (distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) > maxBoundaryInTicks //...the distance sensor is at the higher boundary (or can not rotate further)
+            ) {
+                /* Since we know half of a sweep has been completed,
+                   and the sensor is at the higher boundary,
+                   we can just call scanToMin() to complete the sweep */
+                scanToMin(degreesToTravelPerScan);
+                prevDistance = disAndRot;
+                return disAndRot;
+            }
+
+
+
+            else if (
+                    Objects.equals(actionInProgress, "sweepOnce") //But if we are doing a single sweep...
+                            && //...and...
+                            ((distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) < 0)) //...the distance sensor is at the lower boundary (or can not rotate further)
+            {
+                /* Since we know half of a sweep has been completed,
+                   and the sensor is at the lower boundary,
+                   we can just call scanToMax() to complete the sweep */
+                scanToMax(degreesToTravelPerScan);
+                prevDistance = disAndRot;
+                return disAndRot;
+            }
+
+
+
+            if(
+                    (Objects.equals(actionInProgress, "scanOnce")) // If we are only scanning once...
+                            && //...and either:
+                            (
+                                    ((distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) > maxBoundaryInTicks) // A.) the distance sensor is at the higher boundary
+                                            || //OR
+                                            ((distanceServo.getPosition() + degreesToServoTicks(degreesToTravelPerScan)) < 0.00) // B.) The distance sensor is at the lower boundary
+                            )
+            ) {// then stop rotating and just scan in place
+                actionInProgress = "none";
+                prevDistance = disAndRot;
+                return disAndRot;
+            }
+
+            // If none of those if statements happen it must be continuous rotation.
+            degreesToTravelPerScan = degreesToTravelPerScan * -1.00; // So reverse directions to go back to the opposite boundary
+            rotate(-degreesToTravelPerScan);
+            prevDistance = disAndRot;
+            return getRightDistanceWithoutScan(); // After rotating, it returns the new distance
+
+        }
+
+        // If the sensor is not at a boundary...
+        rotate(-degreesToTravelPerScan);
+        prevDistance = disAndRot;
+        return getRightDistanceWithoutScan(); // After rotating, it returns the new distance
     }
 }
