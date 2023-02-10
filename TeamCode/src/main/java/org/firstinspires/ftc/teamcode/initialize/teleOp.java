@@ -55,5 +55,7 @@ public class teleOp extends OpMode {
 
         claw.toggleClawWithPress(gamepad2.right_bumper);
         swivel.toggleSwivelWithPress(gamepad1.left_bumper);
+
+        distanceSensor.telemetryOutput();
     }
 }

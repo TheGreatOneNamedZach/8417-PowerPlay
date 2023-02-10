@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.other.customSensors.mb1043sensor;
 
 import java.util.Objects;
@@ -21,6 +22,7 @@ public class distanceSensor {
     private org.firstinspires.ftc.teamcode.other.customSensors.mb1043sensor mb1043sensor;
     private Servo distanceServo;
     private double[] prevDistance;
+    Telemetry telemetry;
     // DECLARE CUSTOM
     private static final double errorFromRobotZero = 5.00; // This is how far the USS sensor 0 degrees is off from the robot 0 degrees
     private final double servoSpinAreaInDegrees = 135.00 - errorFromRobotZero;
@@ -39,6 +41,7 @@ public class distanceSensor {
      */
     public void init(@NonNull OpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
+        telemetry = opMode.telemetry;
         mb1043sensor = hardwareMap.get(mb1043sensor.class, "Distance Sensor");
         distanceServo = hardwareMap.get(Servo.class, "Distance Servo");
     }
@@ -346,5 +349,9 @@ public class distanceSensor {
         rotate(-degreesToTravelPerScan);
         prevDistance = disAndRot;
         return getRightDistanceWithoutScan(); // After rotating, it returns the new distance
+    }
+
+    public void telemetryOutput() {
+        telemetry.addData("Distance", getRightDistanceWithoutScan());
     }
 }
