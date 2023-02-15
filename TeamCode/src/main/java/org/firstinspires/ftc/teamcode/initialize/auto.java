@@ -297,21 +297,22 @@ public class auto extends OpMode {
                     actionRuntime.reset();
                 }
             } else if (robotAction == 16) {
-                distanceSensor.distanceSensorTurnToDegree(0);
+                distanceSensor.distanceSensorTurnToDegree(95);
                 waitThenGoToNextAction(0.5);
             } else if (robotAction == 17) {
-                if(actionRuntime.time() >= 3){ // If this action runs longer than it should...
+                if(actionRuntime.time() >= 3.5){ // If this action runs longer than it should...
                     timeLimit = 3;
                     failedColor = true;
-                    mecanumDrive(3.0, -0.15, 0, 0);
+                    mecanumDrive(3.5, -0.25, 0, 0);
                 }
-                if(colorSensor.getDistance() <= 1000.00) { // If there is a pole
+                if(distanceSensor.getRightDistanceWithoutScan()[0] <= 20.0) { // If there is a pole
                     timeLimit = actionRuntime.time();
-                    mecanumDrive(1.3, -0.25, 0, 0); // Move back a bit because the robot is too close
+                    mecanumDrive(1.0, -0.25, 0, 0); // Move back a bit because the robot is too close
                 } else {
-                    mecanumDrive.setPower(0, -0.15, 0); // Moves forwards until it detects the pole. Y is negative to go forwards in setpower()
+                    mecanumDrive.setPower(0, -0.25, 0); // Moves forwards until it detects the pole. Y is negative to go forwards in setpower()
                 }
             } else if (robotAction == 18) {
+                distanceSensor.distanceSensorTurnToDegree(0);
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 19) {
                 if(failedColor) {
@@ -333,12 +334,7 @@ public class auto extends OpMode {
             } else if (robotAction == 22) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 23) {
-                if (failedColor) {
-                    robotAction++;
-                    actionRuntime.reset();
-                } else {
-                    mecanumDrive(timeLimit - 0.5, -0.15, 0, 0); // Goes back for as long as it went forwards minus 0.25 seconds
-                }
+                mecanumDrive(timeLimit - 0.5, -0.25, 0, 0); // Goes back for as long as it went forwards minus 0.25 seconds
             } else if (robotAction == 24) {
                 waitThenGoToNextAction(0.2);
             } else if (robotAction == 25) {

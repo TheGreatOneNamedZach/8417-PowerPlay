@@ -106,9 +106,11 @@ public class imageDetectionTF {
                         label = recognition.getLabel();
                     }
                 }
+                confidence = -1;
                 return label;
             }
         }
+        confidence = -1;
         return null;
     }
 }

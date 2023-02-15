@@ -136,10 +136,11 @@ public class autoPark extends OpMode {
                 mecanumDrive(.2, 1, 0, 0);
             } else if(robotAction == 1) {
                 waitThenGoToNextAction(0.2);
-                mecanumDrive(length, 0, -1, 0);
             } else if(robotAction == 2){
-                waitThenGoToNextAction(0.2);
+                mecanumDrive(length, 0, -1, 0);
             } else if(robotAction == 3){
+                waitThenGoToNextAction(0.2);
+            } else if (robotAction == 4) {
                 mecanumDrive(length, 1, 0,0);
             }
         }
@@ -162,7 +163,7 @@ public class autoPark extends OpMode {
             } else if(robotAction == 1){ // Waits 0.2 seconds
                 mecanumDrive(.2,0,0,0);
             } else if(robotAction == 2) { // Strafes right
-                mecanumDrive(length, 0, 1, 0);
+                mecanumDrive(length + 0.2, 0, 1, 0);
             } else if(robotAction == 3){ // Waits 0.2 seconds
                 mecanumDrive(.2,0,0,0);
             } else if(robotAction == 4) { // Moves forwards

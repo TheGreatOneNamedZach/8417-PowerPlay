@@ -352,6 +352,6 @@ public class distanceSensor {
     }
 
     public void telemetryOutput() {
-        telemetry.addData("Distance", getRightDistanceWithoutScan());
+        telemetry.addData("Distance", getRightDistanceWithoutScan()[0]);
     }
 }
