@@ -20,6 +20,10 @@ public class mecanumDrive {
     DcMotor fL;
     DcMotor bR;
     DcMotor bL;
+    double fRPwr;
+    double fLPwr;
+    double bRPwr;
+    double bLPwr;
     Telemetry telemetry;
     // DECLARE CUSTOM
     static double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
@@ -94,19 +98,27 @@ public class mecanumDrive {
 
         //Code to calculate motor power
         double ratio = Math.max((Math.abs(x) + Math.abs(y) + Math.abs(rot)), 1);
-        double fRMotorPwr = (-x - y - rot) / ratio;
-        double fLMotorPwr = (x - y + rot) / ratio;
-        double bRMotorPwr = (x - y - rot) / ratio;
-        double bLMotorPwr = (-x - y + rot) / ratio;
+        fRPwr = (-x - y - rot) / ratio;
+        fLPwr = (x - y + rot) / ratio;
+        bRPwr = (x - y - rot) / ratio;
+        bLPwr = (-x - y + rot) / ratio;
 
-        telemetry.addData("fRMotorPwr", df.format(fRMotorPwr));
-        telemetry.addData("fLMotorPwr", df.format(fLMotorPwr));
-        telemetry.addData("bRMotorPwr", df.format(bRMotorPwr));
-        telemetry.addData("bLMotorPwr", df.format(bLMotorPwr));
+        fR.setPower(fRPwr * totalSpeed * slowSpeed);
+        fL.setPower(fLPwr * totalSpeed * slowSpeed);
+        bR.setPower(bRPwr * totalSpeed * slowSpeed);
+        bL.setPower(bLPwr * totalSpeed * slowSpeed);
+    }
 
-        fR.setPower(fRMotorPwr * totalSpeed * slowSpeed);
-        fL.setPower(fLMotorPwr * totalSpeed * slowSpeed);
-        bR.setPower(bRMotorPwr * totalSpeed * slowSpeed);
-        bL.setPower(bLMotorPwr * totalSpeed * slowSpeed);
+    public void telemetryOutput() {
+        // Power output
+        telemetry.addData("fRMotorPwr", df.format(fRPwr));
+        telemetry.addData("fLMotorPwr", df.format(fLPwr));
+        telemetry.addData("bRMotorPwr", df.format(bRPwr));
+        telemetry.addData("bLMotorPwr", df.format(bLPwr));
+        // Ticks
+        telemetry.addData("Front Left Ticks", fL.getCurrentPosition());
+        telemetry.addData("Front Right Ticks", fR.getCurrentPosition());
+        telemetry.addData("Back Left Ticks", bL.getCurrentPosition());
+        telemetry.addData("Back Right Ticks", bR.getCurrentPosition());
     }
 }

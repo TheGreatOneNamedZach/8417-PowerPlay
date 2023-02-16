@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.initialize;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -24,7 +22,7 @@ import java.util.Objects;
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
 @Autonomous(name = "Drive By Time + Cone", group = "Main")
-public class auto extends OpMode {
+public class autoHigh extends OpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
@@ -35,6 +33,7 @@ public class auto extends OpMode {
     org.firstinspires.ftc.teamcode.action.colorSensor colorSensor = new colorSensor();
     org.firstinspires.ftc.teamcode.action.claw claw = new claw();
     org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
+    org.firstinspires.ftc.teamcode.initialize.initialize initialize = new initialize();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
@@ -52,18 +51,14 @@ public class auto extends OpMode {
     // METHODS
     /** Initializes the autonomous. */
     public void init(){
-        telemetry.addData("", "Please wait...");
-
-        // Gives information to access OpMode specific objects (e.g. motors, webcam, and telemetry)
-        distanceSensor.init(this);
-        mecanumDrive.init(this);
-        linearSlide.init(this);
-        colorSensor.init(this);
-        claw.init(this);
-        swivel.init(this);
-
-        // Initialises Vuforia and the webcam
-        webcam.init(this, false, true, null);
+        initialize.init(this)
+                .distanceSensor()
+                .mecanumDrive()
+                .linearSlide()
+                .colorSensor()
+                .claw()
+                .swivel()
+                .webcam(false, true, null);
 
         mecanumDrive.setMaxSpeed(1.00); // Sets the maximum speed of the wheels. Slow-mode is enabled automatically so this is really 0.5
         mecanumDrive.runWithoutEncoder();

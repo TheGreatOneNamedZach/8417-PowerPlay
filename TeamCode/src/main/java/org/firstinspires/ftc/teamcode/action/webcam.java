@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF;
 
 import java.util.List;
 
+/** This is an interface for this year's webcam. */
 public class webcam {
     // CONSTRUCT
     org.firstinspires.ftc.teamcode.other.customSensors.imageDetectionTF imageDetectionTF = new imageDetectionTF();
@@ -19,9 +20,19 @@ public class webcam {
     Telemetry telemetry;
     // DECLARE CUSTOM
     Boolean hasAlreadyRun = false;
-
     // METHODS
 
+    /** Initializes the webcam.
+     * @param opMode If you are constructing from an Auto or TeleOp, type in "this" without the quotation marks.
+     * @param tensorFlow "True" if you want to initialize TensorFlow.
+     * @param vuforia "True" if you want to initialize Vuforia.
+     * @param teamColor Leave "null" if not initializing TensorFlow.
+     * @apiNote "teamColor" specifies which model to use for object detection.
+     * "Default" uses the default model.
+     * "Blue" Uses the blue cone bias model.
+     * "Red", "null", or any other value uses the model trained on just the image with no cone.
+     * If no team color is specified when TensorFlow is initialized, the "Red" model is used.
+     */
     public void init(@NonNull OpMode opMode, @NonNull Boolean tensorFlow, @NonNull Boolean vuforia, String teamColor) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
@@ -40,10 +51,12 @@ public class webcam {
         telemetry = opMode.telemetry;
     }
 
+    /** Returns the label of a new image, if any. */
     public String tf_FindNewImages() {
         return imageDetectionTF.imageReturn();
     }
 
+    /** Outputs data about all images seen to the driver station phone. */
     public void tf_OutputTelemetry() {
         if (imageDetectionTF.tfod != null) { // If the image detector has started up...
             List<Recognition> recognitionsList = imageDetectionTF.tfod.getRecognitions(); // Creates a list with every image detected

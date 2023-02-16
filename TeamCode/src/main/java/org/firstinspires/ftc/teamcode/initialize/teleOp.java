@@ -21,17 +21,20 @@ public class teleOp extends OpMode {
     org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
     org.firstinspires.ftc.teamcode.action.linearSlide linearSlide = new linearSlide();
     org.firstinspires.ftc.teamcode.action.distanceSensor distanceSensor = new distanceSensor();
+    org.firstinspires.ftc.teamcode.initialize.initialize initialize = new initialize();
     // DECLARE NULL
     // DECLARE CUSTOM
     // METHODS
     /** Initializes the teleop. */
     @Override
     public void init() {
-        mecanumDrive.init(this);
-        claw.init(this);
-        swivel.init(this);
-        linearSlide.init(this);
-        distanceSensor.init(this);
+        initialize.init(this)
+                .mecanumDrive()
+                .claw()
+                .swivel()
+                .linearSlide()
+                .distanceSensor()
+                .telemetryOutputWhenReady();
     }
 
     /** Runs one time when the teleop starts. */
@@ -56,6 +59,7 @@ public class teleOp extends OpMode {
         claw.toggleClawWithPress(gamepad2.right_bumper);
         swivel.toggleSwivelWithPress(gamepad1.left_bumper);
 
+        mecanumDrive.telemetryOutput();
         distanceSensor.telemetryOutput();
     }
 }
