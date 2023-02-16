@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.other.redr.util.BNO055IMUUtil;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceRunner;
+import org.firstinspires.ftc.teamcode.other.redr.util.Encoder;
 import org.firstinspires.ftc.teamcode.other.redr.util.LynxModuleUtil;
 
 import java.util.ArrayList;
@@ -73,6 +74,9 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
+
+    Encoder encoderLeftFront;
+    Encoder encoderRightFront;
 
     private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
@@ -123,6 +127,12 @@ public class SampleMecanumDrive extends MecanumDrive {
         leftRear = hardwareMap.get(DcMotorEx.class, "Back Left");
         rightRear = hardwareMap.get(DcMotorEx.class, "Back Right");
         rightFront = hardwareMap.get(DcMotorEx.class, "Front Right");
+
+        encoderLeftFront = new Encoder(leftFront);
+        encoderRightFront = new Encoder(rightFront);
+
+        encoderLeftFront.setDirection(Encoder.Direction.REVERSE);
+        encoderRightFront.setDirection(Encoder.Direction.REVERSE);
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -274,11 +284,11 @@ public class SampleMecanumDrive extends MecanumDrive {
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();
 
-        wheelPositions.add(encoderTicksToInches(leftFront.getCurrentPosition() * -1));
+        wheelPositions.add(encoderTicksToInches(encoderLeftFront.getCurrentPosition()));
         wheelPositions.add(encoderTicksToInches(leftRear.getCurrentPosition()));
 
         wheelPositions.add(encoderTicksToInches(rightRear.getCurrentPosition()));
-        wheelPositions.add(encoderTicksToInches(rightFront.getCurrentPosition() * -1));
+        wheelPositions.add(encoderTicksToInches(encoderRightFront.getCurrentPosition()));
 
 /*
         for (DcMotorEx motor : motors) {
@@ -291,11 +301,11 @@ public class SampleMecanumDrive extends MecanumDrive {
     public List<Double> getWheelVelocities() {
         List<Double> wheelVelocities = new ArrayList<>();
 
-        wheelVelocities.add(encoderTicksToInches(leftFront.getVelocity() * -1));
+        wheelVelocities.add(encoderTicksToInches(encoderLeftFront.getRawVelocity()));
         wheelVelocities.add(encoderTicksToInches(leftRear.getVelocity()));
 
         wheelVelocities.add(encoderTicksToInches(rightRear.getVelocity()));
-        wheelVelocities.add(encoderTicksToInches(rightFront.getVelocity() * -1));
+        wheelVelocities.add(encoderTicksToInches(encoderRightFront.getRawVelocity()));
 
 /*
         for (DcMotorEx motor : motors) {

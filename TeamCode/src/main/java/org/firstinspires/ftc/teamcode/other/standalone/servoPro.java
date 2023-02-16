@@ -4,27 +4,29 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.action.claw;
+
 /** This TeleOp allows you to find the position of a servo using a gamepad controller. */
 @TeleOp(name =  "Servo Programmer", group = "e")
 public class servoPro extends OpMode {
-    Servo claw;
+    Servo servo;
     @Override
     public void init() {
-        claw = hardwareMap.get(Servo.class, "Swivel");
+        servo = hardwareMap.get(Servo.class, "Swivel");
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Pos", claw.getPosition());
-        if(gamepad2.left_bumper) {
-            if (gamepad2.right_stick_x > 0) {
-                claw.setPosition(0.2 * gamepad2.right_stick_x + 0.6);
-            }
+        telemetry.addData("Pos", servo.getPosition());
+        if (gamepad2.right_stick_x > 0) {
+            servo.setPosition(0.2 * gamepad2.right_stick_x + 0.6);
         } else {
             if(gamepad2.a) {
-                claw.setPosition(0.6);
-            } else {
-                claw.setPosition(0.72);
+                servo.setPosition(0.6);
+            } else if (gamepad1.dpad_up) {
+                servo.setPosition(servo.getPosition() + 0.01);
+            } else if (gamepad1.dpad_down) {
+                servo.setPosition(servo.getPosition() - 0.01);
             }
         }
     }
