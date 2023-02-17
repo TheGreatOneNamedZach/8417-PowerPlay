@@ -23,7 +23,6 @@ public class autoPark extends OpMode {
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
     org.firstinspires.ftc.teamcode.action.mecanumDrive mecanumDrive = new mecanumDrive();
     org.firstinspires.ftc.teamcode.action.webcam webcam = new webcam();
-    org.firstinspires.ftc.teamcode.initialize.initialize initialize = new initialize();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
@@ -37,9 +36,8 @@ public class autoPark extends OpMode {
     // METHODS
     /** Initializes the autonomous. */
     public void init(){
-        initialize.init(this)
-                .mecanumDrive()
-                .webcam(false, true, null);
+        mecanumDrive.init(this);
+        webcam.init(this, false, true, null);
 
         mecanumDrive.setMaxSpeed(1.00); // Sets the maximum speed of the wheels. Slow-mode is enabled automatically so this is really 0.5
         mecanumDrive.runWithoutEncoder();

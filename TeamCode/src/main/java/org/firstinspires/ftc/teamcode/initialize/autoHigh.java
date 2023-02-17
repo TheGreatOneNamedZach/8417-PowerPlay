@@ -33,7 +33,6 @@ public class autoHigh extends OpMode {
     org.firstinspires.ftc.teamcode.action.colorSensor colorSensor = new colorSensor();
     org.firstinspires.ftc.teamcode.action.claw claw = new claw();
     org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
-    org.firstinspires.ftc.teamcode.initialize.initialize initialize = new initialize();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     // DECLARE CUSTOM
@@ -51,14 +50,13 @@ public class autoHigh extends OpMode {
     // METHODS
     /** Initializes the autonomous. */
     public void init(){
-        initialize.init(this)
-                .distanceSensor()
-                .mecanumDrive()
-                .linearSlide()
-                .colorSensor()
-                .claw()
-                .swivel()
-                .webcam(false, true, null);
+        distanceSensor.init(this);
+        mecanumDrive.init(this);
+        linearSlide.init(this);
+        colorSensor.init(this);
+        claw.init(this);
+        swivel.init(this);
+        webcam.init(this, false, true, null);
 
         mecanumDrive.setMaxSpeed(1.00); // Sets the maximum speed of the wheels. Slow-mode is enabled automatically so this is really 0.5
         mecanumDrive.runWithoutEncoder();
