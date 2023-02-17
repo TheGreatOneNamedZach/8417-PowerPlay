@@ -284,16 +284,9 @@ public class SampleMecanumDrive extends MecanumDrive {
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();
 
-        wheelPositions.add(encoderTicksToInches(encoderLeftFront.getCurrentPosition()));
-        wheelPositions.add(encoderTicksToInches(leftRear.getCurrentPosition()));
-
-        wheelPositions.add(encoderTicksToInches(rightRear.getCurrentPosition()));
-        wheelPositions.add(encoderTicksToInches(encoderRightFront.getCurrentPosition()));
-
-/*
         for (DcMotorEx motor : motors) {
             wheelPositions.add(encoderTicksToInches(motor.getCurrentPosition()));
-        }*/
+        }
         return wheelPositions;
     }
 
@@ -301,16 +294,9 @@ public class SampleMecanumDrive extends MecanumDrive {
     public List<Double> getWheelVelocities() {
         List<Double> wheelVelocities = new ArrayList<>();
 
-        wheelVelocities.add(encoderTicksToInches(encoderLeftFront.getRawVelocity()));
-        wheelVelocities.add(encoderTicksToInches(leftRear.getVelocity()));
-
-        wheelVelocities.add(encoderTicksToInches(rightRear.getVelocity()));
-        wheelVelocities.add(encoderTicksToInches(encoderRightFront.getRawVelocity()));
-
-/*
         for (DcMotorEx motor : motors) {
             wheelVelocities.add(encoderTicksToInches(motor.getVelocity()));
-        }*/
+        }
         return wheelVelocities;
     }
 
