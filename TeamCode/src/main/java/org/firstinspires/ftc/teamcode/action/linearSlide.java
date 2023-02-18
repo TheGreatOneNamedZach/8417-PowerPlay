@@ -20,7 +20,7 @@ public class linearSlide {
     // DECLARE CUSTOM
     private static double totalSpeed = 0.75; // Speed multiplier for the slide
     private static final double maxAutoSpeed = 0.6; // Maximum speed the linear slide can operate at AUTOMATICALLY. "Auto" does not stand for "autonomous"
-    private static final double hoverSpeed = 0.012; // Speed at which the slide can hover
+    private static final double hoverSpeed = 0.01; // Speed at which the slide can hover
     private static double slidePower = 0.00;
 
     // METHODS

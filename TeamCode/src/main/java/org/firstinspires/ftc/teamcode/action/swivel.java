@@ -16,8 +16,8 @@ public class swivel {
     private static Boolean isBackwards;
     // DECLARE CUSTOM
     private static double delayInSeconds = 0.75;
-    private static final double backwardPositionInTicks = 0.71;
-    private static final double forwardPositionInTicks = 0.61;
+    private static final double backwardPositionInTicks = 0.66;
+    private static final double forwardPositionInTicks = 0.55;
 
     // METHODS
     /** Initializes the swivel.

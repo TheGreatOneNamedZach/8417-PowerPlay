@@ -21,7 +21,7 @@ import java.util.Objects;
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
-@Autonomous(name = "Drive By Time + Cone", group = "Main")
+@Autonomous(name = "Drive By Time + High Cone", group = "Z_Backup")
 public class autoHigh extends OpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
@@ -361,32 +361,6 @@ public class autoHigh extends OpMode {
         if(actionRuntime.time() >= secondsToWait){ // If this action runs longer than it should...
             robotAction++; // Go to the next action
             actionRuntime.reset(); // Reset the timer
-        }
-    }
-
-    private void tFTelemetry(TFObjectDetector tfod) { // Displays data about images detected to the phone screen
-        if (tfod != null) { // If the image detector has started up...
-            List<Recognition> recognitionsList = tfod.getRecognitions(); // Creates a list with every image detected
-            if (recognitionsList != null) { // This will run if at least one image has been detected
-                telemetry.addData("Number Of Images Detected", recognitionsList.size());
-
-                for (Recognition recognition : recognitionsList) {
-                    // This "for" statement will run for every image detected
-                    double col = (recognition.getLeft() + recognition.getRight()) / 2; // Finds the "X" position of the image on the webcam stream
-                    double row = (recognition.getTop() + recognition.getBottom()) / 2; // Finds the "Y" position of the image on the webcam stream
-                    double width = Math.abs(recognition.getRight() - recognition.getLeft()); // Finds the width of the image on the webcam stream
-                    double height = Math.abs(recognition.getTop() - recognition.getBottom()); // Finds the heights of the image on the webcam stream
-
-                    // Adds a blank line between every image detected
-                    telemetry.addData("", " ");
-                    // Displays to the phone screen the name of the image and how confident that it is correct
-                    telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                    // Displays to the phone screen the X and Y coordinates of the image. The coordinates are the image's position on the webcam stream
-                    telemetry.addData("- Position (Row/Col)", "%.0f / %.0f", row, col);
-                    // Displays to the phone screen the size of the image. The size of the image output is the size on the webcam stream
-                    telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
-                }
-            }
         }
     }
 

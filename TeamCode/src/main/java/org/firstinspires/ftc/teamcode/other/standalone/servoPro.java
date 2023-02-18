@@ -19,7 +19,7 @@ public class servoPro extends OpMode {
     public void loop() {
         telemetry.addData("Pos", servo.getPosition());
         if (gamepad2.right_stick_x > 0) {
-            servo.setPosition(0.2 * gamepad2.right_stick_x + 0.6);
+            servo.setPosition(0.2 * gamepad2.right_stick_x + 0.5);
         } else {
             if(gamepad2.a) {
                 servo.setPosition(0.6);
