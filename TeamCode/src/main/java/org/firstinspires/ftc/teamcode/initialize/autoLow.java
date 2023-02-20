@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.action.webcam;
 import org.firstinspires.ftc.teamcode.other.redr.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceBuilder;
+import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceRunner;
 
 import java.util.Objects;
 
@@ -96,15 +97,14 @@ public class autoLow extends LinearOpMode {
 
                     } else {
                         Right8417_1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineToConstantHeading(new Vector2d(48.00, -54.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(48.00, -55.00), Math.toRadians(90.00))
                                 .addDisplacementMarker(() -> claw.open())
-                                .splineToConstantHeading(new Vector2d(48.00, -63.00), Math.toRadians(270.00))
-                                .splineToConstantHeading(new Vector2d(60.00, -61.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(48.00, -61.00), Math.toRadians(270.00))
+                                .splineToConstantHeading(new Vector2d(61.00, -55.00), Math.toRadians(90.00))
                                 .lineToConstantHeading(new Vector2d(57.00, -12.00))
-                                .turn(Math.toRadians(-90))
                                 .build();
                         Right8417_2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
-                                .lineToConstantHeading(new Vector2d(62.00, -12.00))
+                                .lineToConstantHeading(new Vector2d(64.00, -12.00))
                                 .build();
                         drive.setPoseEstimate(Right8417_1.start());
                     }
@@ -165,10 +165,15 @@ public class autoLow extends LinearOpMode {
 
             if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt") && !autoFinished) {
                 drive.followTrajectorySequence(Right8417_1);
+                linearSlide.goToPosition(600);
+                drive.turn(-drive.getPoseEstimate().getHeading() - Math.toRadians(6)); // Turns to face 0 degrees
                 drive.followTrajectorySequence(Right8417_2);
 
                 autoFinished = true;
             }
+            try {
+                telemetry.addData("Rot", Math.toDegrees(drive.getLastError().getHeading()));
+            } catch (Exception ignored) {}
 
             if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
                 // Parks in the middle zone if the image is a robot or light bulb

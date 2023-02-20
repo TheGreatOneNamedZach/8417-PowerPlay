@@ -37,6 +37,7 @@ import org.firstinspires.ftc.teamcode.other.redr.util.LynxModuleUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.firstinspires.ftc.teamcode.other.redr.drive.DriveConstants.MAX_ACCEL;
@@ -56,10 +57,10 @@ import static org.firstinspires.ftc.teamcode.other.redr.drive.DriveConstants.kV;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0.45, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(2.55, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(0.75, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.4; // 1.4 to go 60in; 1.166 to read distance accurately
+    public static double LATERAL_MULTIPLIER = 1.166; // 1.4 to go 60in; 1.166 to read distance accurately
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -302,10 +303,20 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        leftFront.setPower(v);
-        leftRear.setPower(v1);
-        rightRear.setPower(v2);
-        rightFront.setPower(v3);
+        double voltage = batteryVoltageSensor.getVoltage();
+        double scalar = 12.00 / voltage;
+
+        v *= scalar;
+        v1 *= scalar;
+        v2 *= scalar;
+        v3 *= scalar;
+
+        // Only find max when one of the values is greater than 1
+        double max = Collections.max(Arrays.asList(v, v1, v2, v3, 1.0));
+        leftFront.setPower(v / max);
+        leftRear.setPower(v1 / max);
+        rightRear.setPower(v2 / max);
+        rightFront.setPower(v3 / max);
     }
 
     @Override
