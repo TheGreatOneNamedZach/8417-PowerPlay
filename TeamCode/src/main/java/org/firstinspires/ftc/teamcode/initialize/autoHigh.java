@@ -110,7 +110,7 @@ public class autoHigh extends OpMode {
             if (startLeftSide) {
                 telemetry.addData("Side", "You are starting on the left side of the field.");
             } else {
-                telemetry.addData("Side", "You are starting on the right sie of the field.");
+                telemetry.addData("Side", "You are starting on the right side of the field.");
             }
 
             // TELEMETRY

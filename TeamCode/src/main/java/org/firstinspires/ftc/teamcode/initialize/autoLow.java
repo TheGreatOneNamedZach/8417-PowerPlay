@@ -39,9 +39,10 @@ public class autoLow extends LinearOpMode {
     org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
-    TrajectorySequence Right8417_1;
-    TrajectorySequence Right8417_2;
-    TrajectorySequence Right8417_3;
+    TrajectorySequence autoPart1;
+    TrajectorySequence autoPart2;
+    TrajectorySequence autoPart3;
+    TrajectorySequence autoPart3Reversed;
     SampleMecanumDrive drive;
     // DECLARE CUSTOM
     int robotAction = 0; // Keeps track of which action the bot is currently doing
@@ -97,23 +98,31 @@ public class autoLow extends LinearOpMode {
                     if (startLeftSide) {
 
                     } else {
-                        Right8417_1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                        autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
                                 .splineToConstantHeading(new Vector2d(48.00, -55.00), Math.toRadians(90.00))
                                 .addDisplacementMarker(() -> claw.open())
                                 .splineToConstantHeading(new Vector2d(48.00, -61.00), Math.toRadians(270.00))
                                 .splineToConstantHeading(new Vector2d(61.00, -55.00), Math.toRadians(90.00))
-                                .lineToConstantHeading(new Vector2d(57.00, -12.00))
+                                //.lineToConstantHeading(new Vector2d(57.00, -12.00)) // If the spline below does not work for whatever reason use this
+                                .splineToConstantHeading(new Vector2d(57.00, -12.00), Math.toRadians(90.00))
                                 .build();
-                        Right8417_2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
-                                .lineToConstantHeading(new Vector2d(65.00, -12.00))
+                        drive.setPoseEstimate(autoPart1.start());
+                        autoPart2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
+                                .lineToConstantHeading(new Vector2d(63.75, -12.00))
                                 .build();
-                        drive.setPoseEstimate(Right8417_1.start());
-                        Right8417_3 = drive.trajectorySequenceBuilder(new Pose2d(64.81, -11.67, Math.toRadians(0.00)))
+                        autoPart3 = drive.trajectorySequenceBuilder(new Pose2d(63.75, -12.00, Math.toRadians(0.00)))
                                 .setReversed(true)
-                                .splineToConstantHeading(new Vector2d(37.00, -24.00), Math.toRadians(0.00))
+                                .splineToConstantHeading(new Vector2d(36.00, -23.00), Math.toRadians(-90.00))
                                 .setReversed(false)
+                                .splineToConstantHeading(new Vector2d(43.00, -24.00), Math.toRadians(0.00))
                                 .build();
-
+                        autoPart3Reversed = drive.trajectorySequenceBuilder(new Pose2d(43.00, -24.00, Math.toRadians(0.00)))
+                                .setReversed(true)
+                                .splineToConstantHeading(new Vector2d(38.00, -23.00), Math.toRadians(180.00))
+                                .splineToConstantHeading(new Vector2d(47.00, -12.00), Math.toRadians(0.00))
+                                .setReversed(false)
+                                .splineToConstantHeading(new Vector2d(63.75, -12.00), Math.toRadians(0.00))
+                                .build();
                     }
                 }
 
@@ -141,7 +150,7 @@ public class autoLow extends LinearOpMode {
                 if (startLeftSide) {
                     telemetry.addData("Side", "You are starting on the left side of the field.");
                 } else {
-                    telemetry.addData("Side", "You are starting on the right sie of the field.");
+                    telemetry.addData("Side", "You are starting on the right side of the field.");
                 }
 
                 // TELEMETRY
@@ -156,8 +165,7 @@ public class autoLow extends LinearOpMode {
         actionRuntime.reset();
         linearSlide.resetEncoder();
 
-        distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
-        distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
+        distanceSensor.distanceSensorTurnToDegree(90); // Because of this we move it to not the start and then to where we want it to go
 
         claw.close();
         swivel.goToFront();
@@ -171,14 +179,34 @@ public class autoLow extends LinearOpMode {
             telemetry.addData("Elev", linearSlide.getCurrentPosition());
 
             if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt") && !autoFinished) {
-                drive.followTrajectorySequence(Right8417_1);
-                linearSlide.goToPosition(600);
+                drive.followTrajectorySequence(autoPart1);
+                linearSlide.goToPosition(540);
                 drive.turn(-drive.getPoseEstimate().getHeading() - Math.toRadians(6)); // Turns to face 0 degrees
-                drive.followTrajectorySequence(Right8417_2);
+                drive.followTrajectorySequence(autoPart2);
                 claw.close();
-                sleep(500);
-                linearSlide.goToPosition(900);
-                drive.followTrajectorySequence(Right8417_3);
+                sleep(300);
+                linearSlide.goToPosition(1400);
+                sleep(300);
+
+                drive.followTrajectorySequence(autoPart3);
+                claw.open();
+                linearSlide.goToPosition(460);
+                sleep(100);
+                drive.followTrajectorySequence(autoPart3Reversed);
+                claw.close();
+                sleep(300);
+                linearSlide.goToPosition(1400);
+                sleep(300);
+
+                drive.followTrajectorySequence(autoPart3);
+                claw.open();
+                linearSlide.goToPosition(380);
+                sleep(100);
+                drive.followTrajectorySequence(autoPart3Reversed);
+                claw.close();
+                sleep(300);
+                linearSlide.goToPosition(1400);
+                sleep(300);
 
                 autoFinished = true;
             }

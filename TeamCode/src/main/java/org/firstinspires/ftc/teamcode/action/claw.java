@@ -15,8 +15,8 @@ public class claw {
     private static Servo claw;
     // DECLARE CUSTOM
     private static double delayInSeconds = 0.75;
-    private static final double closedPositionInTicks = 0.60;
-    private static final double openPositionInTicks = 0.38;
+    private static final double closedPositionInTicks = 0.68;
+    private static final double openPositionInTicks = 0.46;
     private static Boolean isClosed = false;
 
     // METHODS
