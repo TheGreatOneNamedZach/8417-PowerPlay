@@ -108,9 +108,9 @@ public class autoLow extends LinearOpMode {
                                 .build();
                         drive.setPoseEstimate(autoPart1.start());
                         autoPart2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
-                                .lineToConstantHeading(new Vector2d(63.75, -12.00))
+                                .lineToConstantHeading(new Vector2d(64.00, -12.00))
                                 .build();
-                        autoPart3 = drive.trajectorySequenceBuilder(new Pose2d(63.75, -12.00, Math.toRadians(0.00)))
+                        autoPart3 = drive.trajectorySequenceBuilder(new Pose2d(64.00, -12.00, Math.toRadians(0.00)))
                                 .setReversed(true)
                                 .splineToConstantHeading(new Vector2d(36.00, -23.00), Math.toRadians(-90.00))
                                 .setReversed(false)
@@ -121,7 +121,7 @@ public class autoLow extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(38.00, -23.00), Math.toRadians(180.00))
                                 .splineToConstantHeading(new Vector2d(47.00, -12.00), Math.toRadians(0.00))
                                 .setReversed(false)
-                                .splineToConstantHeading(new Vector2d(63.75, -12.00), Math.toRadians(0.00))
+                                .splineToConstantHeading(new Vector2d(64.00, -12.00), Math.toRadians(0.00))
                                 .build();
                     }
                 }
@@ -186,7 +186,7 @@ public class autoLow extends LinearOpMode {
                 claw.close();
                 sleep(300);
                 linearSlide.goToPosition(1400);
-                sleep(300);
+                sleep(100);
 
                 drive.followTrajectorySequence(autoPart3);
                 claw.open();
@@ -196,7 +196,7 @@ public class autoLow extends LinearOpMode {
                 claw.close();
                 sleep(300);
                 linearSlide.goToPosition(1400);
-                sleep(300);
+                sleep(100);
 
                 drive.followTrajectorySequence(autoPart3);
                 claw.open();
@@ -206,7 +206,7 @@ public class autoLow extends LinearOpMode {
                 claw.close();
                 sleep(300);
                 linearSlide.goToPosition(1400);
-                sleep(300);
+                sleep(100);
 
                 autoFinished = true;
             }
