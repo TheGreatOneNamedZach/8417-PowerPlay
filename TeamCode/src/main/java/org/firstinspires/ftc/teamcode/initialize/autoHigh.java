@@ -21,7 +21,7 @@ import java.util.Objects;
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
-@Autonomous(name = "Drive By Time + High Cone", group = "Z_Backup")
+@Autonomous(name = "Drive By Time + High Cone", group = "Y_Backup")
 public class autoHigh extends OpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for

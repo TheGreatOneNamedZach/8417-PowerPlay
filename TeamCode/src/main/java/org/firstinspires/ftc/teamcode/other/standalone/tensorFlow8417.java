@@ -99,7 +99,7 @@ Guide Last Updated: Feb 4, 2023
  */
 
 //@Disabled
-@Autonomous(name = "TensorFlow Test", group = "VisionTest")
+@Autonomous(name = "TensorFlow Test", group = "Z_Test")
 public class tensorFlow8417 extends LinearOpMode {
     /* "modelArray" contains all information needed for image detection.
     The following is an example of what needs to be added:

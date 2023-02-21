@@ -4,20 +4,15 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.action.claw;
-import org.firstinspires.ftc.teamcode.action.colorSensor;
 import org.firstinspires.ftc.teamcode.action.distanceSensor;
-import org.firstinspires.ftc.teamcode.action.linearSlide;
 import org.firstinspires.ftc.teamcode.action.mecanumDrive;
 import org.firstinspires.ftc.teamcode.action.swivel;
 import org.firstinspires.ftc.teamcode.action.webcam;
 import org.firstinspires.ftc.teamcode.other.redr.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceBuilder;
-import org.firstinspires.ftc.teamcode.other.redr.trajectorysequence.TrajectorySequenceRunner;
 
 import java.util.Objects;
 
@@ -25,36 +20,28 @@ import java.util.Objects;
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
-@Autonomous(name = "Drive By Time + Low Cones", group = "B_ParkingWithCones")
-public class autoLow extends LinearOpMode {
+@Autonomous(name = "RR Drive By Time", group = "A_ParkingOnly")
+public class autoParkRR extends LinearOpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
     ElapsedTime actionRuntime = new ElapsedTime(); // How long the current action has run for
     org.firstinspires.ftc.teamcode.action.distanceSensor distanceSensor = new distanceSensor();
     org.firstinspires.ftc.teamcode.action.mecanumDrive mecanumDrive = new mecanumDrive();
-    org.firstinspires.ftc.teamcode.action.linearSlide linearSlide = new linearSlide();
     org.firstinspires.ftc.teamcode.action.webcam webcam = new webcam();
-    org.firstinspires.ftc.teamcode.action.colorSensor colorSensor = new colorSensor();
     org.firstinspires.ftc.teamcode.action.claw claw = new claw();
     org.firstinspires.ftc.teamcode.action.swivel swivel = new swivel();
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
-    TrajectorySequence Right8417_1;
-    TrajectorySequence Right8417_2;
-    TrajectorySequence Right8417_3;
+    TrajectorySequence LeftParking;
+    TrajectorySequence MiddleParking;
+    TrajectorySequence RightParking;
     SampleMecanumDrive drive;
     // DECLARE CUSTOM
-    int robotAction = 0; // Keeps track of which action the bot is currently doing
-    double length = 1.0; // The time the action runs for
-    double[] distance = {-1, -1, -1, -1};
     String duck = "not found."; // Stores the name of the found image that has the highest confidence. This is the same as "tempDuck" but is never null
     public String teamColor = "Red"; // Which alliance we are currently on
     Boolean tFInitHasRun = false; // Has the TensorFlow initialise method run already?
     Boolean teamSelected = false; // Has the primary driver selected an alliance?
-    Boolean startLeftSide = true;
-    Boolean failedColor = false;
     Boolean autoFinished = false;
-    private static double timeLimit = 0.00;
     // METHODS
     /* The primary driver will select which image detection model they want to use for the match
     This is determined by the alliance they are currently on
@@ -62,10 +49,8 @@ public class autoLow extends LinearOpMode {
     /** Loops until the start button is pressed. */
     public void runOpMode(){
         // INIT
-        distanceSensor.init(this);
         mecanumDrive.init(this);
-        linearSlide.init(this);
-        colorSensor.init(this);
+        distanceSensor.init(this);
         claw.init(this);
         swivel.init(this);
         webcam.init(this, false, true, null);
@@ -84,37 +69,24 @@ public class autoLow extends LinearOpMode {
                 teamColor = "Default";
             } else if (gamepad1.y) { // If the Y button is pressed, the driver has selected an alliance
                 teamSelected = true;
-            } else if (gamepad1.dpad_left) {
-                startLeftSide = true;
-            } else if (gamepad1.dpad_right) {
-                startLeftSide = false;
             }
             if (teamSelected) { // When the team has been selected...
                 if (!tFInitHasRun) { // Initialise TensorFlow if it has not been started already
                     webcam.init(this, true, false, teamColor);
                     tFInitHasRun = true;
 
-                    if (startLeftSide) {
-
-                    } else {
-                        Right8417_1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineToConstantHeading(new Vector2d(48.00, -55.00), Math.toRadians(90.00))
-                                .addDisplacementMarker(() -> claw.open())
-                                .splineToConstantHeading(new Vector2d(48.00, -61.00), Math.toRadians(270.00))
-                                .splineToConstantHeading(new Vector2d(61.00, -55.00), Math.toRadians(90.00))
-                                .lineToConstantHeading(new Vector2d(57.00, -12.00))
-                                .build();
-                        Right8417_2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
-                                .lineToConstantHeading(new Vector2d(65.00, -12.00))
-                                .build();
-                        drive.setPoseEstimate(Right8417_1.start());
-                        Right8417_3 = drive.trajectorySequenceBuilder(new Pose2d(64.81, -11.67, Math.toRadians(0.00)))
-                                .setReversed(true)
-                                .splineToConstantHeading(new Vector2d(37.00, -24.00), Math.toRadians(0.00))
-                                .setReversed(false)
-                                .build();
-
-                    }
+                    LeftParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(13.00, -54.00), Math.toRadians(90.00))
+                            .splineTo(new Vector2d(13.00, -37.00), Math.toRadians(90.00))
+                            .build();
+                    MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(36.00, -37.00), Math.toRadians(90.00))
+                            .build();
+                    RightParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(61.00, -54.00), Math.toRadians(90.00))
+                            .splineTo(new Vector2d(61.00, -37.00), Math.toRadians(90.00))
+                            .build();
+                    drive.setPoseEstimate(LeftParking.start());
                 }
 
                 tempDuck = webcam.tf_FindNewImages(); // The variable "tempDuck" contains the latest detected image name (if any)
@@ -138,11 +110,6 @@ public class autoLow extends LinearOpMode {
                 } else {
                     telemetry.addData("Team Alliance", "You are using the " + teamColor + " signal cone.\nUse X to change to the blue alliance.\nUse B to change to the red alliance.");
                 }
-                if (startLeftSide) {
-                    telemetry.addData("Side", "You are starting on the left side of the field.");
-                } else {
-                    telemetry.addData("Side", "You are starting on the right sie of the field.");
-                }
 
                 // TELEMETRY
                 // Tells the primary driver how to confirm their selection
@@ -154,7 +121,6 @@ public class autoLow extends LinearOpMode {
         // START
         autoRuntime.reset(); // Resets both timers
         actionRuntime.reset();
-        linearSlide.resetEncoder();
 
         distanceSensor.distanceSensorTurnToDegree(10); // A servo always assumes it is at the starting position at the start (even if it is not)
         distanceSensor.returnToStart(); // Because of this we move it to not the start and back to the start
@@ -167,35 +133,24 @@ public class autoLow extends LinearOpMode {
             // LOOP
             telemetry.addData("Time Elapsed For Autonomous", autoRuntime.seconds()); // Time since the autonomous has started
             telemetry.addData("Time Elapsed For Action", actionRuntime.time()); // Displays the current time since the action has started
-            telemetry.addData("Robot Action", robotAction); // Displays the current action the robot is on
-            telemetry.addData("Elev", linearSlide.getCurrentPosition());
 
             if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt") && !autoFinished) {
-                drive.followTrajectorySequence(Right8417_1);
-                linearSlide.goToPosition(600);
-                drive.turn(-drive.getPoseEstimate().getHeading() - Math.toRadians(6)); // Turns to face 0 degrees
-                drive.followTrajectorySequence(Right8417_2);
-                claw.close();
-                sleep(500);
-                linearSlide.goToPosition(900);
-                drive.followTrajectorySequence(Right8417_3);
-
+                drive.followTrajectorySequence(LeftParking);
                 autoFinished = true;
             }
-            try {
-                telemetry.addData("Rot", Math.toDegrees(drive.getLastError().getHeading()));
-            } catch (Exception ignored) {}
 
             if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
                 // Parks in the middle zone if the image is a robot or light bulb
                 // If no image is ever found, this will run
                 // If the driver does not wait for the image detector to load, this will run
-
+                drive.followTrajectorySequence(MiddleParking);
+                autoFinished = true;
             }
 
             if(Objects.equals(duck, "Handsaw") || Objects.equals(duck, "Panel")) {
                 // Parks in the right zone if the image is the handsaw or solar panel
-
+                drive.followTrajectorySequence(RightParking);
+                autoFinished = true;
             }
             telemetry.update();
         }
