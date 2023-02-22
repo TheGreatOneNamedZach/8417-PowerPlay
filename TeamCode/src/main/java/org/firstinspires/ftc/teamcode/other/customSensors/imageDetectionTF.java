@@ -101,7 +101,7 @@ public class imageDetectionTF {
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
                 for (Recognition recognition : updatedRecognitions) {
-                    if (recognition.getConfidence() > confidence) {
+                    if (recognition.getConfidence() > confidence && Math.abs(recognition.getRight() - recognition.getLeft()) <= 175) {
                         confidence = recognition.getConfidence();
                         label = recognition.getLabel();
                     }

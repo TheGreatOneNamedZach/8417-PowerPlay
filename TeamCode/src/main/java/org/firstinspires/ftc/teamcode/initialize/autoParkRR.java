@@ -139,7 +139,7 @@ public class autoParkRR extends LinearOpMode {
                 autoFinished = true;
             }
 
-            if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
+            if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, "not found.")) {
                 // Parks in the middle zone if the image is a robot or light bulb
                 // If no image is ever found, this will run
                 // If the driver does not wait for the image detector to load, this will run
