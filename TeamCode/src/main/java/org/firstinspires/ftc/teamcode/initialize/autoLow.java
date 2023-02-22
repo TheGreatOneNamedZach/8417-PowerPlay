@@ -104,6 +104,18 @@ public class autoLow extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(-36.00, -65.00), Math.toRadians(-90.00))
                                 .setReversed(false)
                                 .build();
+                        drive.setPoseEstimate(autoPart1.start());
+                        LeftParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(-13.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(-13.00, -37.00), Math.toRadians(90.00))
+                                .build();
+                        MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(-36.00, -37.00), Math.toRadians(90.00))
+                                .build();
+                        RightParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(-61.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(-61.00, -37.00), Math.toRadians(90.00))
+                                .build();
                     } else {
                         autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
                                 .splineToConstantHeading(new Vector2d(48.00, -54.00), Math.toRadians(90.00))
@@ -112,19 +124,19 @@ public class autoLow extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(36.00, -65.00), Math.toRadians(-90.00))
                                 .setReversed(false)
                                 .build();
+                        drive.setPoseEstimate(autoPart1.start());
+                        LeftParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(13.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(13.00, -37.00), Math.toRadians(90.00))
+                                .build();
+                        MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(36.00, -37.00), Math.toRadians(90.00))
+                                .build();
+                        RightParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                                .splineTo(new Vector2d(61.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(61.00, -37.00), Math.toRadians(90.00))
+                                .build();
                     }
-                    drive.setPoseEstimate(autoPart1.start());
-                    LeftParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                            .splineTo(new Vector2d(13.00, -54.00), Math.toRadians(90.00))
-                            .splineTo(new Vector2d(13.00, -37.00), Math.toRadians(90.00))
-                            .build();
-                    MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                            .splineTo(new Vector2d(36.00, -37.00), Math.toRadians(90.00))
-                            .build();
-                    RightParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                            .splineTo(new Vector2d(61.00, -54.00), Math.toRadians(90.00))
-                            .splineTo(new Vector2d(61.00, -37.00), Math.toRadians(90.00))
-                            .build();
                 }
 
                 tempDuck = webcam.tf_FindNewImages(); // The variable "tempDuck" contains the latest detected image name (if any)
