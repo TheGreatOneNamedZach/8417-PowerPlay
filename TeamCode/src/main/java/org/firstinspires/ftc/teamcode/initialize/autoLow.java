@@ -25,7 +25,7 @@ import java.util.Objects;
  * It uses Vuforia and TensorFlow to detect a custom (or default) sleeve on the signal cone.
  * In addition, it detects the high junction and places a cone on it.
  * The robot moves on a timer. This autonomous is a backup to our RoadRunner autonomous. */
-@Autonomous(name = "Drive By Time + Low Cones", group = "B_ParkingWithCones")
+@Autonomous(name = "Drive By Time + Ground Cone", group = "B_ParkingWithCones")
 public class autoLow extends LinearOpMode {
     // CONSTRUCT
     public ElapsedTime autoRuntime = new ElapsedTime(); // How long the autonomous has run for
@@ -40,8 +40,9 @@ public class autoLow extends LinearOpMode {
     // DECLARE NULL
     String tempDuck; // Stores the name of any newly found image. This will be null when no NEW image is found
     TrajectorySequence autoPart1;
-    TrajectorySequence autoPart2;
-    TrajectorySequence autoPart3;
+    TrajectorySequence LeftParking;
+    TrajectorySequence MiddleParking;
+    TrajectorySequence RightParking;
     TrajectorySequence autoPart3Reversed;
     SampleMecanumDrive drive;
     // DECLARE CUSTOM
@@ -96,34 +97,34 @@ public class autoLow extends LinearOpMode {
                     tFInitHasRun = true;
 
                     if (startLeftSide) {
-
+                        autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
+                                .splineToConstantHeading(new Vector2d(-48.00, -54.00), Math.toRadians(90.00))
+                                .addDisplacementMarker(() -> claw.open())
+                                .setReversed(true)
+                                .splineToConstantHeading(new Vector2d(-36.00, -65.00), Math.toRadians(-90.00))
+                                .setReversed(false)
+                                .build();
                     } else {
                         autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineToConstantHeading(new Vector2d(48.00, -55.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(48.00, -54.00), Math.toRadians(90.00))
                                 .addDisplacementMarker(() -> claw.open())
-                                .splineToConstantHeading(new Vector2d(48.00, -61.00), Math.toRadians(270.00))
-                                .splineToConstantHeading(new Vector2d(61.00, -55.00), Math.toRadians(90.00))
-                                //.lineToConstantHeading(new Vector2d(57.00, -12.00)) // If the spline below does not work for whatever reason use this
-                                .splineToConstantHeading(new Vector2d(57.00, -12.00), Math.toRadians(90.00))
-                                .build();
-                        drive.setPoseEstimate(autoPart1.start());
-                        autoPart2 = drive.trajectorySequenceBuilder(new Pose2d(57.00, -12.00, Math.toRadians(0.00)))
-                                .lineToConstantHeading(new Vector2d(64.00, -12.00))
-                                .build();
-                        autoPart3 = drive.trajectorySequenceBuilder(new Pose2d(64.00, -12.00, Math.toRadians(0.00)))
                                 .setReversed(true)
-                                .splineToConstantHeading(new Vector2d(36.00, -23.00), Math.toRadians(-90.00))
+                                .splineToConstantHeading(new Vector2d(36.00, -65.00), Math.toRadians(-90.00))
                                 .setReversed(false)
-                                .splineToConstantHeading(new Vector2d(43.00, -24.00), Math.toRadians(0.00))
-                                .build();
-                        autoPart3Reversed = drive.trajectorySequenceBuilder(new Pose2d(43.00, -24.00, Math.toRadians(0.00)))
-                                .setReversed(true)
-                                .splineToConstantHeading(new Vector2d(38.00, -23.00), Math.toRadians(180.00))
-                                .splineToConstantHeading(new Vector2d(47.00, -12.00), Math.toRadians(0.00))
-                                .setReversed(false)
-                                .splineToConstantHeading(new Vector2d(64.00, -12.00), Math.toRadians(0.00))
                                 .build();
                     }
+                    drive.setPoseEstimate(autoPart1.start());
+                    LeftParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(13.00, -54.00), Math.toRadians(90.00))
+                            .splineTo(new Vector2d(13.00, -37.00), Math.toRadians(90.00))
+                            .build();
+                    MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(36.00, -37.00), Math.toRadians(90.00))
+                            .build();
+                    RightParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
+                            .splineTo(new Vector2d(61.00, -54.00), Math.toRadians(90.00))
+                            .splineTo(new Vector2d(61.00, -37.00), Math.toRadians(90.00))
+                            .build();
                 }
 
                 tempDuck = webcam.tf_FindNewImages(); // The variable "tempDuck" contains the latest detected image name (if any)
@@ -180,50 +181,27 @@ public class autoLow extends LinearOpMode {
 
             if(Objects.equals(duck, "Turtle") || Objects.equals(duck, "Bolt") && !autoFinished) {
                 drive.followTrajectorySequence(autoPart1);
-                linearSlide.goToPosition(540);
-                drive.turn(-drive.getPoseEstimate().getHeading() - Math.toRadians(6)); // Turns to face 0 degrees
-                drive.followTrajectorySequence(autoPart2);
-                claw.close();
-                sleep(300);
-                linearSlide.goToPosition(1400);
-                sleep(100);
-
-                drive.followTrajectorySequence(autoPart3);
-                claw.open();
-                linearSlide.goToPosition(460);
-                sleep(100);
-                drive.followTrajectorySequence(autoPart3Reversed);
-                claw.close();
-                sleep(300);
-                linearSlide.goToPosition(1400);
-                sleep(100);
-
-                drive.followTrajectorySequence(autoPart3);
-                claw.open();
-                linearSlide.goToPosition(380);
-                sleep(100);
-                drive.followTrajectorySequence(autoPart3Reversed);
-                claw.close();
-                sleep(300);
-                linearSlide.goToPosition(1400);
-                sleep(100);
-
+                drive.followTrajectorySequence(LeftParking);
                 autoFinished = true;
             }
             try {
                 telemetry.addData("Rot", Math.toDegrees(drive.getLastError().getHeading()));
             } catch (Exception ignored) {}
 
-            if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null)) {
+            if (Objects.equals(duck, "Robot") || Objects.equals(duck, "Light") || Objects.equals(duck, null) && !autoFinished) {
                 // Parks in the middle zone if the image is a robot or light bulb
                 // If no image is ever found, this will run
                 // If the driver does not wait for the image detector to load, this will run
-
+                drive.followTrajectorySequence(autoPart1);
+                drive.followTrajectorySequence(MiddleParking);
+                autoFinished = true;
             }
 
-            if(Objects.equals(duck, "Handsaw") || Objects.equals(duck, "Panel")) {
+            if(Objects.equals(duck, "Handsaw") || Objects.equals(duck, "Panel") && !autoFinished) {
                 // Parks in the right zone if the image is the handsaw or solar panel
-
+                drive.followTrajectorySequence(autoPart1);
+                drive.followTrajectorySequence(RightParking);
+                autoFinished = true;
             }
             telemetry.update();
         }
