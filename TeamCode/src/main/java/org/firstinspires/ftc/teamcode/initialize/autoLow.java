@@ -98,7 +98,7 @@ public class autoLow extends LinearOpMode {
 
                     if (startLeftSide) {
                         autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
-                                .splineToConstantHeading(new Vector2d(-48.00, -54.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(-48.00, -54.60), Math.toRadians(90.00))
                                 .addDisplacementMarker(() -> claw.open())
                                 .setReversed(true)
                                 .splineToConstantHeading(new Vector2d(-36.00, -65.00), Math.toRadians(-90.00))
@@ -106,19 +106,19 @@ public class autoLow extends LinearOpMode {
                                 .build();
                         drive.setPoseEstimate(autoPart1.start());
                         LeftParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
-                                .splineTo(new Vector2d(-13.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(-13.00, -54.60), Math.toRadians(90.00))
                                 .splineTo(new Vector2d(-13.00, -37.00), Math.toRadians(90.00))
                                 .build();
                         MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
                                 .splineTo(new Vector2d(-36.00, -37.00), Math.toRadians(90.00))
                                 .build();
                         RightParking = drive.trajectorySequenceBuilder(new Pose2d(-36.00, -65.00, Math.toRadians(90.00)))
-                                .splineTo(new Vector2d(-61.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(-61.00, -54.60), Math.toRadians(90.00))
                                 .splineTo(new Vector2d(-61.00, -37.00), Math.toRadians(90.00))
                                 .build();
                     } else {
                         autoPart1 = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineToConstantHeading(new Vector2d(48.00, -54.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(48.00, -54.60), Math.toRadians(90.00))
                                 .addDisplacementMarker(() -> claw.open())
                                 .setReversed(true)
                                 .splineToConstantHeading(new Vector2d(36.00, -65.00), Math.toRadians(-90.00))
@@ -126,14 +126,14 @@ public class autoLow extends LinearOpMode {
                                 .build();
                         drive.setPoseEstimate(autoPart1.start());
                         LeftParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineTo(new Vector2d(13.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(13.00, -54.60), Math.toRadians(90.00))
                                 .splineTo(new Vector2d(13.00, -37.00), Math.toRadians(90.00))
                                 .build();
                         MiddleParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
                                 .splineTo(new Vector2d(36.00, -37.00), Math.toRadians(90.00))
                                 .build();
                         RightParking = drive.trajectorySequenceBuilder(new Pose2d(36.00, -65.00, Math.toRadians(90.00)))
-                                .splineTo(new Vector2d(61.00, -54.00), Math.toRadians(90.00))
+                                .splineTo(new Vector2d(61.00, -54.60), Math.toRadians(90.00))
                                 .splineTo(new Vector2d(61.00, -37.00), Math.toRadians(90.00))
                                 .build();
                     }
